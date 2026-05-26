@@ -50,14 +50,4 @@ npm run dev
 ```
 Open `http://localhost:8080` in your browser.
 
-## Deployment
 
-### Deploying to Vercel
-TanStack Start has native compatibility with Vercel. 
-1. Push your code to a GitHub repository.
-2. Go to the [Vercel Dashboard](https://vercel.com) and import the repository.
-3. Vercel should automatically detect the project framework or use the Vite preset.
-4. Add your environment variables (`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`) in the Vercel project settings.
-5. Deploy!
-
-*Note: Since the project contains Cloudflare configurations (`wrangler.jsonc`), you can also build and deploy it directly to Cloudflare Pages/Workers if desired.*
