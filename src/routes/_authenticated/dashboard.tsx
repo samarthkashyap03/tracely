@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus, BarChart3, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth";
 import { useJobs } from "@/lib/queries";
 import { JobTable } from "@/components/JobTable";
 import { JobFormSheet } from "@/components/JobFormSheet";
 import { StatsCards } from "@/components/StatsCards";
+import { QuickNotes } from "@/components/QuickNotes";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import type { JobApplication } from "@/lib/types";
 
@@ -18,6 +20,7 @@ function DashboardPage() {
   const { user } = useAuth();
   const { data: jobs = [], isLoading } = useJobs(user?.id);
   const [open, setOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
   const [editing, setEditing] = useState<JobApplication | null>(null);
 
   const openNew = () => {
@@ -46,9 +49,20 @@ function DashboardPage() {
             Every role you've applied to, in one place.
           </p>
         </div>
-        <Button onClick={openNew}>
-          <Plus className="size-4" /> Add application
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/analytics"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card hover:bg-accent/80 px-4 text-sm font-medium text-foreground transition"
+          >
+            <BarChart3 className="size-4 text-primary" /> Analytics
+          </Link>
+          <Button variant="outline" onClick={() => setNotesOpen(true)} className="flex items-center gap-2 h-9">
+            <StickyNote className="size-4 text-primary" /> Notes
+          </Button>
+          <Button onClick={openNew}>
+            <Plus className="size-4" /> Add application
+          </Button>
+        </div>
       </div>
 
       <StatsCards jobs={jobs} />
@@ -60,6 +74,14 @@ function DashboardPage() {
       )}
 
       <JobFormSheet open={open} onOpenChange={setOpen} editing={editing} />
+
+      <Sheet open={notesOpen} onOpenChange={setNotesOpen}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          <div className="py-4">
+            <QuickNotes isEmbed />
+          </div>
+        </SheetContent>
+      </Sheet>
     </main>
   );
 }

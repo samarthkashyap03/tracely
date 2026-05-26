@@ -138,3 +138,23 @@ drop trigger if exists on_auth_user_seed_options on auth.users;
 create trigger on_auth_user_seed_options
   after insert on auth.users
   for each row execute function public.seed_user_options();
+
+-- ---------- user_notes ----------
+create table if not exists public.user_notes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  content text not null,
+  completed boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.user_notes enable row level security;
+
+create policy "notes: select own" on public.user_notes
+  for select using (auth.uid() = user_id);
+create policy "notes: insert own" on public.user_notes
+  for insert with check (auth.uid() = user_id);
+create policy "notes: update own" on public.user_notes
+  for update using (auth.uid() = user_id);
+create policy "notes: delete own" on public.user_notes
+  for delete using (auth.uid() = user_id);

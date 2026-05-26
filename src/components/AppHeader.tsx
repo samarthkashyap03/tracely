@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Briefcase, LogOut, Settings, LayoutDashboard, FileText } from "lucide-react";
+import { Briefcase, LogOut, Settings, LayoutDashboard, FileText, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ export function AppHeader() {
           </Link>
           <nav className="flex items-center gap-1">
             {navLink("/dashboard", "Dashboard", LayoutDashboard)}
+            {navLink("/analytics", "Analytics", BarChart3)}
             {navLink("/resumes", "Resumes", FileText)}
             {navLink("/settings", "Settings", Settings)}
           </nav>

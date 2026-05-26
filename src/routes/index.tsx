@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Briefcase, CheckCircle2, LayoutGrid, Lock, Sparkles, Zap } from "lucide-react";
+import { Briefcase, CheckCircle2, LayoutGrid, Lock, Sparkles, Zap, FileText, BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -56,8 +56,7 @@ function Landing() {
               Every application. <span className="text-primary">One quiet dashboard.</span>
             </h1>
             <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Track companies, statuses, platforms, and roles without spreadsheet chaos. Customize
-              every field. Own your data.
+              Track applications without spreadsheet chaos. Organize your resumes, link them to specific jobs, and view visual analytics in one calm, secure dashboard.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3">
               <Link
@@ -86,6 +85,16 @@ function Landing() {
                 body: "Sort, filter, search. No cognitive overload — just the columns that matter.",
               },
               {
+                icon: BarChart3,
+                title: "Visual analytics",
+                body: "View charts showing your applications growth, conversion rates, and top platforms.",
+              },
+              {
+                icon: FileText,
+                title: "Resume organizer",
+                body: "Upload, preview, and download your resumes, neatly organized and linked to applications.",
+              },
+              {
                 icon: Zap,
                 title: "Custom fields",
                 body: "Add your own platforms, statuses, work types, and roles. Make it yours.",
@@ -94,16 +103,6 @@ function Landing() {
                 icon: Lock,
                 title: "Your data, secured",
                 body: "Row-level security on Supabase. Only you can see your applications.",
-              },
-              {
-                icon: CheckCircle2,
-                title: "Auto timestamps",
-                body: "Applied date is captured the moment you add an entry.",
-              },
-              {
-                icon: Briefcase,
-                title: "Every detail",
-                body: "Company, role, salary, link, notes, location — keep it all in one row.",
               },
               {
                 icon: Sparkles,

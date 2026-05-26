@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabase";
-import type { JobApplication, OptionCategory, UserOption, Resume } from "./types";
+import type { JobApplication, OptionCategory, UserOption, Resume, UserNote } from "./types";
 
 // ---------- Jobs ----------
 export function useJobs(userId: string | undefined) {
@@ -207,5 +207,69 @@ export function useDeleteResume(userId: string | undefined) {
       qc.invalidateQueries({ queryKey: ["resumes", userId] });
       qc.invalidateQueries({ queryKey: ["jobs", userId] });
     },
+  });
+}
+
+// ---------- Notes ----------
+export function useNotes(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["notes", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_notes")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as UserNote[];
+    },
+  });
+}
+
+export function useCreateNote(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (content: string) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { data, error } = await supabase
+        .from("user_notes")
+        .insert({ user_id: userId, content, completed: false })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as UserNote;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notes", userId] }),
+  });
+}
+
+export function useUpdateNote(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, completed, content }: { id: string; completed?: boolean; content?: string }) => {
+      const patch: any = {};
+      if (completed !== undefined) patch.completed = completed;
+      if (content !== undefined) patch.content = content;
+      const { data, error } = await supabase
+        .from("user_notes")
+        .update(patch)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as UserNote;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notes", userId] }),
+  });
+}
+
+export function useDeleteNote(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("user_notes").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notes", userId] }),
   });
 }

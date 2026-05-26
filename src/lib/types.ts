@@ -34,3 +34,11 @@ export interface UserOption {
   value: string;
   created_at: string;
 }
+
+export interface UserNote {
+  id: string;
+  user_id: string;
+  content: string;
+  completed: boolean;
+  created_at: string;
+}
