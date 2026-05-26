@@ -1,16 +1,6 @@
 import * as React from "react";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ComboboxProps {
@@ -18,82 +8,77 @@ interface ComboboxProps {
   onChange: (v: string) => void;
   options: string[];
   placeholder?: string;
-  onCreate?: (v: string) => void | Promise<void>;
-  allowCreate?: boolean;
 }
 
 export function Combobox({
   value,
   onChange,
   options,
-  placeholder = "Select…",
-  onCreate,
-  allowCreate = true,
+  placeholder = "Type or select…",
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-  const canCreate =
-    allowCreate &&
-    !!onCreate &&
-    search.trim() &&
-    !options.some((o) => o.toLowerCase() === search.trim().toLowerCase());
+  const [inputValue, setInputValue] = React.useState(value ?? "");
+
+  React.useEffect(() => {
+    setInputValue(value ?? "");
+  }, [value]);
+
+  const filtered = React.useMemo(() => {
+    if (!inputValue.trim()) return options;
+    return options.filter((o) =>
+      o.toLowerCase().includes(inputValue.toLowerCase())
+    );
+  }, [options, inputValue]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          className={cn("w-full justify-between font-normal", !value && "text-muted-foreground")}
-        >
-          {value || placeholder}
-          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-        </Button>
+        <div className="relative w-full">
+          <Input
+            value={inputValue}
+            onChange={(e) => {
+              const val = e.target.value;
+              setInputValue(val);
+              onChange(val);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setOpen(false);
+              }
+            }}
+            placeholder={placeholder}
+            className="w-full pr-8"
+          />
+          <ChevronsUpDown className="absolute right-2.5 top-2.5 size-4 shrink-0 opacity-50 pointer-events-none" />
+        </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search…" value={search} onValueChange={setSearch} />
-          <CommandList>
-            <CommandEmpty>{canCreate ? "No match. Use 'Add new'." : "Nothing found."}</CommandEmpty>
-            <CommandGroup>
-              {options.map((opt) => (
-                <CommandItem
-                  key={opt}
-                  value={opt}
-                  onSelect={() => {
-                    onChange(opt);
-                    setOpen(false);
-                    setSearch("");
-                  }}
-                >
-                  <Check
-                    className={cn("mr-2 size-4", value === opt ? "opacity-100" : "opacity-0")}
-                  />
-                  {opt}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            {canCreate && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={async () => {
-                      const v = search.trim();
-                      await onCreate?.(v);
-                      onChange(v);
-                      setOpen(false);
-                      setSearch("");
-                    }}
-                  >
-                    <Plus className="mr-2 size-4" /> Add "{search.trim()}"
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
+      {filtered.length > 0 && (
+        <PopoverContent
+          className="w-[var(--radix-popover-trigger-width)] p-1 max-h-60 overflow-y-auto bg-card border border-border/60"
+          align="start"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <div className="flex flex-col gap-0.5">
+            {filtered.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                className="flex items-center justify-between text-left text-sm px-2.5 py-1.5 rounded-md hover:bg-accent hover:text-accent-foreground transition cursor-pointer text-foreground"
+                onClick={() => {
+                  onChange(opt);
+                  setInputValue(opt);
+                  setOpen(false);
+                }}
+              >
+                <span>{opt}</span>
+                {value === opt && <Check className="size-4 text-primary" />}
+              </button>
+            ))}
+          </div>
+        </PopoverContent>
+      )}
     </Popover>
   );
 }

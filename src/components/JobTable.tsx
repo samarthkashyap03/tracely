@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
-import { Pencil, Trash2, ExternalLink, Search } from "lucide-react";
+import { Pencil, Trash2, ExternalLink, Search, FileText } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -23,9 +23,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { JobApplication } from "@/lib/types";
-import { useDeleteJob } from "@/lib/queries";
+import { useDeleteJob, useResumes } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 interface Props {
   jobs: JobApplication[];
@@ -35,7 +36,37 @@ interface Props {
 export function JobTable({ jobs, onEdit }: Props) {
   const { user } = useAuth();
   const del = useDeleteJob(user?.id);
+  const { data: resumes = [] } = useResumes(user?.id);
   const [q, setQ] = useState("");
+
+  const downloadResume = async (resumeId: string, fileName: string) => {
+    const resume = resumes.find((r) => r.id === resumeId);
+    if (!resume) {
+      toast.error("Resume details not found");
+      return;
+    }
+    try {
+      const toastId = toast.loading(`Downloading "${fileName}"...`);
+      const { data, error } = await supabase.storage
+        .from("resumes")
+        .download(resume.file_path);
+      toast.dismiss(toastId);
+
+      if (error) throw error;
+      if (!data) throw new Error("No data returned");
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to download file");
+    }
+  };
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
@@ -97,6 +128,7 @@ export function JobTable({ jobs, onEdit }: Props) {
               <TableHead>Status</TableHead>
               <TableHead>Platform</TableHead>
               <TableHead>Work</TableHead>
+              <TableHead>Resume</TableHead>
               <TableHead>Applied</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -104,7 +136,7 @@ export function JobTable({ jobs, onEdit }: Props) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
                   {jobs.length === 0 ? "No applications yet. Add your first one." : "No matches."}
                 </TableCell>
               </TableRow>
@@ -135,6 +167,26 @@ export function JobTable({ jobs, onEdit }: Props) {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{j.platform || "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{j.work_type || "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {j.resume_id ? (
+                      (() => {
+                        const r = resumes.find((res) => res.id === j.resume_id);
+                        if (!r) return "—";
+                        return (
+                          <button
+                            onClick={() => downloadResume(r.id, r.name)}
+                            className="inline-flex items-center gap-1 hover:text-primary transition-colors text-xs bg-accent/40 hover:bg-accent/80 px-2 py-1 rounded max-w-[120px] text-foreground font-medium"
+                            title={`Download ${r.name}`}
+                          >
+                            <FileText className="size-3.5 shrink-0 text-primary" />
+                            <span className="truncate">{r.name}</span>
+                          </button>
+                        );
+                      })()
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell
                     className="text-muted-foreground"
                     title={format(new Date(j.applied_at), "PPpp")}
