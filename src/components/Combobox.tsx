@@ -3,7 +3,13 @@ import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -16,15 +22,30 @@ interface ComboboxProps {
   allowCreate?: boolean;
 }
 
-export function Combobox({ value, onChange, options, placeholder = "Select…", onCreate, allowCreate = true }: ComboboxProps) {
+export function Combobox({
+  value,
+  onChange,
+  options,
+  placeholder = "Select…",
+  onCreate,
+  allowCreate = true,
+}: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
-  const canCreate = allowCreate && !!onCreate && search.trim() && !options.some((o) => o.toLowerCase() === search.trim().toLowerCase());
+  const canCreate =
+    allowCreate &&
+    !!onCreate &&
+    search.trim() &&
+    !options.some((o) => o.toLowerCase() === search.trim().toLowerCase());
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" className={cn("w-full justify-between font-normal", !value && "text-muted-foreground")}>
+        <Button
+          variant="outline"
+          role="combobox"
+          className={cn("w-full justify-between font-normal", !value && "text-muted-foreground")}
+        >
           {value || placeholder}
           <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
@@ -36,8 +57,18 @@ export function Combobox({ value, onChange, options, placeholder = "Select…", 
             <CommandEmpty>{canCreate ? "No match. Use 'Add new'." : "Nothing found."}</CommandEmpty>
             <CommandGroup>
               {options.map((opt) => (
-                <CommandItem key={opt} value={opt} onSelect={() => { onChange(opt); setOpen(false); setSearch(""); }}>
-                  <Check className={cn("mr-2 size-4", value === opt ? "opacity-100" : "opacity-0")} />
+                <CommandItem
+                  key={opt}
+                  value={opt}
+                  onSelect={() => {
+                    onChange(opt);
+                    setOpen(false);
+                    setSearch("");
+                  }}
+                >
+                  <Check
+                    className={cn("mr-2 size-4", value === opt ? "opacity-100" : "opacity-0")}
+                  />
                   {opt}
                 </CommandItem>
               ))}

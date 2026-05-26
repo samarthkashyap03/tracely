@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,8 +24,15 @@ interface Props {
 }
 
 const empty: Partial<JobApplication> = {
-  company_name: "", role: "", status: "Applied", platform: "", work_type: "",
-  location: "", salary: "", url: "", notes: "",
+  company_name: "",
+  role: "",
+  status: "Applied",
+  platform: "",
+  work_type: "",
+  location: "",
+  salary: "",
+  url: "",
+  notes: "",
 };
 
 export function JobFormSheet({ open, onOpenChange, editing }: Props) {
@@ -52,7 +66,10 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
         await update.mutateAsync({ id: editing.id, ...form });
         toast.success("Updated");
       } else {
-        await create.mutateAsync({ ...form, applied_at: form.applied_at || new Date().toISOString() });
+        await create.mutateAsync({
+          ...form,
+          applied_at: form.applied_at || new Date().toISOString(),
+        });
         toast.success("Added");
       }
       onOpenChange(false);
@@ -73,32 +90,79 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
 
         <form onSubmit={onSubmit} className="space-y-4 px-4 pb-6">
           <Field label="Company">
-            <Input required value={form.company_name ?? ""} onChange={(e) => set("company_name", e.target.value)} placeholder="Acme Inc." />
+            <Input
+              required
+              value={form.company_name ?? ""}
+              onChange={(e) => set("company_name", e.target.value)}
+              placeholder="Acme Inc."
+            />
           </Field>
 
           <Field label="Role">
-            <Combobox value={form.role} onChange={(v) => set("role", v)} options={byCat("role")} onCreate={handleCreate("role")} placeholder="e.g. Gen AI Engineer" />
+            <Combobox
+              value={form.role}
+              onChange={(v) => set("role", v)}
+              options={byCat("role")}
+              onCreate={handleCreate("role")}
+              placeholder="e.g. Gen AI Engineer"
+            />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Status">
-              <Combobox value={form.status} onChange={(v) => set("status", v)} options={byCat("status")} onCreate={handleCreate("status")} />
+              <Combobox
+                value={form.status}
+                onChange={(v) => set("status", v)}
+                options={byCat("status")}
+                onCreate={handleCreate("status")}
+              />
             </Field>
             <Field label="Work type">
-              <Combobox value={form.work_type} onChange={(v) => set("work_type", v)} options={byCat("work_type")} onCreate={handleCreate("work_type")} placeholder="Remote / Hybrid" />
+              <Combobox
+                value={form.work_type}
+                onChange={(v) => set("work_type", v)}
+                options={byCat("work_type")}
+                onCreate={handleCreate("work_type")}
+                placeholder="Remote / Hybrid"
+              />
             </Field>
           </div>
 
           <Field label="Platform">
-            <Combobox value={form.platform} onChange={(v) => set("platform", v)} options={byCat("platform")} onCreate={handleCreate("platform")} placeholder="LinkedIn, Stepstone…" />
+            <Combobox
+              value={form.platform}
+              onChange={(v) => set("platform", v)}
+              options={byCat("platform")}
+              onCreate={handleCreate("platform")}
+              placeholder="LinkedIn, Stepstone…"
+            />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Location"><Input value={form.location ?? ""} onChange={(e) => set("location", e.target.value)} placeholder="Berlin" /></Field>
-            <Field label="Salary"><Input value={form.salary ?? ""} onChange={(e) => set("salary", e.target.value)} placeholder="€80k" /></Field>
+            <Field label="Location">
+              <Input
+                value={form.location ?? ""}
+                onChange={(e) => set("location", e.target.value)}
+                placeholder="Berlin"
+              />
+            </Field>
+            <Field label="Salary">
+              <Input
+                value={form.salary ?? ""}
+                onChange={(e) => set("salary", e.target.value)}
+                placeholder="€80k"
+              />
+            </Field>
           </div>
 
-          <Field label="Job URL"><Input type="url" value={form.url ?? ""} onChange={(e) => set("url", e.target.value)} placeholder="https://…" /></Field>
+          <Field label="Job URL">
+            <Input
+              type="url"
+              value={form.url ?? ""}
+              onChange={(e) => set("url", e.target.value)}
+              placeholder="https://…"
+            />
+          </Field>
 
           {editing && (
             <Field label="Applied at">
@@ -110,10 +174,18 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
             </Field>
           )}
 
-          <Field label="Notes"><Textarea rows={3} value={form.notes ?? ""} onChange={(e) => set("notes", e.target.value)} /></Field>
+          <Field label="Notes">
+            <Textarea
+              rows={3}
+              value={form.notes ?? ""}
+              onChange={(e) => set("notes", e.target.value)}
+            />
+          </Field>
 
           <SheetFooter className="px-0">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={create.isPending || update.isPending}>
               {editing ? "Save changes" : "Add application"}
             </Button>

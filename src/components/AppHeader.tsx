@@ -22,7 +22,9 @@ export function AppHeader() {
       to={to}
       className={cn(
         "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition",
-        pathname === to ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+        pathname === to
+          ? "bg-accent text-foreground"
+          : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
       )}
     >
       <Icon className="size-4" /> {label}
@@ -45,7 +47,9 @@ export function AppHeader() {
           </nav>
         </div>
         <div className="flex items-center gap-3">
-          <div className="hidden sm:block text-xs text-muted-foreground max-w-[180px] truncate">{user?.email}</div>
+          <div className="hidden sm:block text-xs text-muted-foreground max-w-[180px] truncate">
+            {user?.email}
+          </div>
           <Button size="sm" variant="ghost" onClick={signOut}>
             <LogOut className="size-4" />
           </Button>

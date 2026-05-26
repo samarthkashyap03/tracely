@@ -31,7 +31,8 @@ function SignupPage() {
       password,
       options: {
         data: { display_name: name },
-        emailRedirectTo: typeof window !== "undefined" ? window.location.origin + "/dashboard" : undefined,
+        emailRedirectTo:
+          typeof window !== "undefined" ? window.location.origin + "/dashboard" : undefined,
       },
     });
     setLoading(false);
@@ -40,24 +41,46 @@ function SignupPage() {
     navigate({ to: "/dashboard" });
   };
 
-  return <AuthShell title="Create your account" subtitle="Start tracking applications in seconds">
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-1.5">
-        <Label htmlFor="name">Display name</Label>
-        <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
-      </div>
-      <Button type="submit" disabled={loading} className="w-full">{loading ? "Creating…" : "Create account"}</Button>
-    </form>
-    <p className="mt-6 text-center text-sm text-muted-foreground">
-      Already have one? <Link to="/login" className="text-foreground hover:underline">Sign in</Link>
-    </p>
-  </AuthShell>;
+  return (
+    <AuthShell title="Create your account" subtitle="Start tracking applications in seconds">
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Display name</Label>
+          <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </div>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Creating…" : "Create account"}
+        </Button>
+      </form>
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        Already have one?{" "}
+        <Link to="/login" className="text-foreground hover:underline">
+          Sign in
+        </Link>
+      </p>
+    </AuthShell>
+  );
 }

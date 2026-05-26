@@ -18,7 +18,8 @@ function ForgotPage() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: typeof window !== "undefined" ? window.location.origin + "/reset-password" : undefined,
+      redirectTo:
+        typeof window !== "undefined" ? window.location.origin + "/reset-password" : undefined,
     });
     setLoading(false);
     if (error) return toast.error(error.message);
@@ -26,22 +27,34 @@ function ForgotPage() {
     toast.success("Reset link sent");
   };
 
-  return <AuthShell title="Reset password" subtitle="We'll email you a reset link">
-    {sent ? (
-      <div className="text-sm text-muted-foreground">
-        Check your inbox for a link to reset your password.
-      </div>
-    ) : (
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+  return (
+    <AuthShell title="Reset password" subtitle="We'll email you a reset link">
+      {sent ? (
+        <div className="text-sm text-muted-foreground">
+          Check your inbox for a link to reset your password.
         </div>
-        <Button type="submit" disabled={loading} className="w-full">{loading ? "Sending…" : "Send reset link"}</Button>
-      </form>
-    )}
-    <p className="mt-6 text-center text-sm text-muted-foreground">
-      <Link to="/login" className="hover:text-foreground">Back to sign in</Link>
-    </p>
-  </AuthShell>;
+      ) : (
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Sending…" : "Send reset link"}
+          </Button>
+        </form>
+      )}
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        <Link to="/login" className="hover:text-foreground">
+          Back to sign in
+        </Link>
+      </p>
+    </AuthShell>
+  );
 }

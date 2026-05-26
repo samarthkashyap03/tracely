@@ -12,7 +12,12 @@ export function StatusBadge({ status }: { status: string }) {
   const key = status.toLowerCase();
   const cls = map[key] ?? "bg-muted text-muted-foreground border-border";
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium", cls)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+        cls,
+      )}
+    >
       {status}
     </span>
   );

@@ -6,7 +6,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Tracely — Premium Job Application Tracker" },
-      { name: "description", content: "Stop losing track of job applications. Tracely is a calm, premium dashboard for every role you apply to." },
+      {
+        name: "description",
+        content:
+          "Stop losing track of job applications. Tracely is a calm, premium dashboard for every role you apply to.",
+      },
     ],
   }),
 });
@@ -23,8 +27,16 @@ function Landing() {
             Tracely
           </Link>
           <nav className="flex items-center gap-2">
-            <Link to="/login" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
-            <Link to="/signup" className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90">
+            <Link
+              to="/login"
+              className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/signup"
+              className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"
+            >
               Get started
             </Link>
           </nav>
@@ -44,14 +56,20 @@ function Landing() {
               Every application. <span className="text-primary">One quiet dashboard.</span>
             </h1>
             <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Track companies, statuses, platforms, and roles without spreadsheet chaos.
-              Customize every field. Own your data.
+              Track companies, statuses, platforms, and roles without spreadsheet chaos. Customize
+              every field. Own your data.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3">
-              <Link to="/signup" className="inline-flex h-11 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:opacity-90">
+              <Link
+                to="/signup"
+                className="inline-flex h-11 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:opacity-90"
+              >
                 Start tracking — it's free
               </Link>
-              <Link to="/login" className="inline-flex h-11 items-center rounded-md border border-border px-6 text-sm font-medium hover:bg-accent">
+              <Link
+                to="/login"
+                className="inline-flex h-11 items-center rounded-md border border-border px-6 text-sm font-medium hover:bg-accent"
+              >
                 Sign in
               </Link>
             </div>
@@ -62,14 +80,41 @@ function Landing() {
         <section className="mx-auto max-w-6xl px-6 pb-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              { icon: LayoutGrid, title: "Clean table view", body: "Sort, filter, search. No cognitive overload — just the columns that matter." },
-              { icon: Zap, title: "Custom fields", body: "Add your own platforms, statuses, work types, and roles. Make it yours." },
-              { icon: Lock, title: "Your data, secured", body: "Row-level security on Supabase. Only you can see your applications." },
-              { icon: CheckCircle2, title: "Auto timestamps", body: "Applied date is captured the moment you add an entry." },
-              { icon: Briefcase, title: "Every detail", body: "Company, role, salary, link, notes, location — keep it all in one row." },
-              { icon: Sparkles, title: "Premium feel", body: "Dark by default. Designed to feel calm even when your inbox isn't." },
+              {
+                icon: LayoutGrid,
+                title: "Clean table view",
+                body: "Sort, filter, search. No cognitive overload — just the columns that matter.",
+              },
+              {
+                icon: Zap,
+                title: "Custom fields",
+                body: "Add your own platforms, statuses, work types, and roles. Make it yours.",
+              },
+              {
+                icon: Lock,
+                title: "Your data, secured",
+                body: "Row-level security on Supabase. Only you can see your applications.",
+              },
+              {
+                icon: CheckCircle2,
+                title: "Auto timestamps",
+                body: "Applied date is captured the moment you add an entry.",
+              },
+              {
+                icon: Briefcase,
+                title: "Every detail",
+                body: "Company, role, salary, link, notes, location — keep it all in one row.",
+              },
+              {
+                icon: Sparkles,
+                title: "Premium feel",
+                body: "Dark by default. Designed to feel calm even when your inbox isn't.",
+              },
             ].map((f) => (
-              <div key={f.title} className="rounded-xl border border-border/70 bg-card/40 p-6 hover:bg-card transition">
+              <div
+                key={f.title}
+                className="rounded-xl border border-border/70 bg-card/40 p-6 hover:bg-card transition"
+              >
                 <div className="grid size-9 place-items-center rounded-md bg-primary/15 text-primary">
                   <f.icon className="size-4" />
                 </div>

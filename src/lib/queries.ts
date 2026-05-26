@@ -24,7 +24,11 @@ export function useCreateJob(userId: string | undefined) {
     mutationFn: async (input: Partial<JobApplication>) => {
       if (!userId) throw new Error("Not authenticated");
       const payload = { ...input, user_id: userId };
-      const { data, error } = await supabase.from("job_applications").insert(payload).select().single();
+      const { data, error } = await supabase
+        .from("job_applications")
+        .insert(payload)
+        .select()
+        .single();
       if (error) throw error;
       return data as JobApplication;
     },
@@ -99,7 +103,10 @@ export function useUpdateOption(userId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, value }: { id: string; value: string }) => {
-      const { error } = await supabase.from("user_options").update({ value: value.trim() }).eq("id", id);
+      const { error } = await supabase
+        .from("user_options")
+        .update({ value: value.trim() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["options", userId] }),

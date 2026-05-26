@@ -27,7 +27,9 @@ export function OptionsManager() {
             onClick={() => setActive(c)}
             className={
               "rounded-md px-3 py-1.5 text-sm transition " +
-              (active === c ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50")
+              (active === c
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50")
             }
           >
             {labels[c]}
@@ -63,13 +65,23 @@ function OptionList({ category }: { category: OptionCategory }) {
   return (
     <Card className="p-4 bg-card/60">
       <form onSubmit={onAdd} className="flex gap-2 mb-4">
-        <Input value={newValue} onChange={(e) => setNewValue(e.target.value)} placeholder={`New ${labels[category].toLowerCase().replace(/s$/, "")}…`} />
-        <Button type="submit" disabled={add.isPending}><Plus className="size-4" /> Add</Button>
+        <Input
+          value={newValue}
+          onChange={(e) => setNewValue(e.target.value)}
+          placeholder={`New ${labels[category].toLowerCase().replace(/s$/, "")}…`}
+        />
+        <Button type="submit" disabled={add.isPending}>
+          <Plus className="size-4" /> Add
+        </Button>
       </form>
       <div className="divide-y divide-border/60">
-        {items.length === 0 && <div className="py-8 text-center text-sm text-muted-foreground">No options yet.</div>}
+        {items.length === 0 && (
+          <div className="py-8 text-center text-sm text-muted-foreground">No options yet.</div>
+        )}
         {items.map((opt) => (
-          <OptionRow key={opt.id} opt={opt}
+          <OptionRow
+            key={opt.id}
+            opt={opt}
             onSave={(v) => update.mutate({ id: opt.id, value: v })}
             onDelete={() => del.mutate(opt.id)}
           />
@@ -79,7 +91,15 @@ function OptionList({ category }: { category: OptionCategory }) {
   );
 }
 
-function OptionRow({ opt, onSave, onDelete }: { opt: UserOption; onSave: (v: string) => void; onDelete: () => void }) {
+function OptionRow({
+  opt,
+  onSave,
+  onDelete,
+}: {
+  opt: UserOption;
+  onSave: (v: string) => void;
+  onDelete: () => void;
+}) {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(opt.value);
   return (
@@ -92,13 +112,35 @@ function OptionRow({ opt, onSave, onDelete }: { opt: UserOption; onSave: (v: str
       <div className="flex gap-1">
         {editing ? (
           <>
-            <Button size="icon" variant="ghost" onClick={() => { onSave(val); setEditing(false); }}><Check className="size-4" /></Button>
-            <Button size="icon" variant="ghost" onClick={() => { setVal(opt.value); setEditing(false); }}><X className="size-4" /></Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => {
+                onSave(val);
+                setEditing(false);
+              }}
+            >
+              <Check className="size-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => {
+                setVal(opt.value);
+                setEditing(false);
+              }}
+            >
+              <X className="size-4" />
+            </Button>
           </>
         ) : (
           <>
-            <Button size="icon" variant="ghost" onClick={() => setEditing(true)}><Pencil className="size-4" /></Button>
-            <Button size="icon" variant="ghost" onClick={onDelete}><Trash2 className="size-4 text-destructive" /></Button>
+            <Button size="icon" variant="ghost" onClick={() => setEditing(true)}>
+              <Pencil className="size-4" />
+            </Button>
+            <Button size="icon" variant="ghost" onClick={onDelete}>
+              <Trash2 className="size-4 text-destructive" />
+            </Button>
           </>
         )}
       </div>

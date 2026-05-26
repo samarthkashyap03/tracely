@@ -32,33 +32,72 @@ function LoginPage() {
     navigate({ to: "/dashboard" });
   };
 
-  return <AuthShell title="Sign in" subtitle="Welcome back to Tracely">
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-      </div>
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">Forgot?</Link>
+  return (
+    <AuthShell title="Sign in" subtitle="Welcome back to Tracely">
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
         </div>
-        <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-      </div>
-      <Button type="submit" disabled={loading} className="w-full">{loading ? "Signing in…" : "Sign in"}</Button>
-    </form>
-    <p className="mt-6 text-center text-sm text-muted-foreground">
-      No account? <Link to="/signup" className="text-foreground hover:underline">Create one</Link>
-    </p>
-  </AuthShell>;
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              to="/forgot-password"
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Forgot?
+            </Link>
+          </div>
+          <Input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+        </div>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Signing in…" : "Sign in"}
+        </Button>
+      </form>
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        No account?{" "}
+        <Link to="/signup" className="text-foreground hover:underline">
+          Create one
+        </Link>
+      </p>
+    </AuthShell>
+  );
 }
 
-export function AuthShell({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+export function AuthShell({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-sm">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2 font-semibold tracking-tight">
-          <div className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground"><Briefcase className="size-4" /></div>
+        <Link
+          to="/"
+          className="mb-8 flex items-center justify-center gap-2 font-semibold tracking-tight"
+        >
+          <div className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
+            <Briefcase className="size-4" />
+          </div>
           Tracely
         </Link>
         <div className="rounded-xl border border-border/70 bg-card/60 p-6 backdrop-blur">

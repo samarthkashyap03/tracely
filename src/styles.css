@@ -49,9 +49,9 @@
   --radius: 0.625rem;
   --background: oklch(0.16 0.012 270);
   --foreground: oklch(0.97 0.005 270);
-  --card: oklch(0.20 0.014 270);
+  --card: oklch(0.2 0.014 270);
   --card-foreground: oklch(0.97 0.005 270);
-  --popover: oklch(0.20 0.014 270);
+  --popover: oklch(0.2 0.014 270);
   --popover-foreground: oklch(0.97 0.005 270);
   --primary: oklch(0.72 0.18 295);
   --primary-foreground: oklch(0.16 0.012 270);
@@ -59,13 +59,13 @@
   --secondary-foreground: oklch(0.97 0.005 270);
   --muted: oklch(0.24 0.014 270);
   --muted-foreground: oklch(0.68 0.02 270);
-  --accent: oklch(0.30 0.04 295);
+  --accent: oklch(0.3 0.04 295);
   --accent-foreground: oklch(0.97 0.005 270);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 270);
   --success: oklch(0.72 0.17 155);
-  --warning: oklch(0.80 0.16 80);
-  --info: oklch(0.70 0.14 230);
+  --warning: oklch(0.8 0.16 80);
+  --info: oklch(0.7 0.14 230);
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 10%);
   --ring: oklch(0.72 0.18 295);
@@ -86,7 +86,7 @@
   --card-foreground: oklch(0.18 0.014 270);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.014 270);
-  --primary: oklch(0.52 0.20 295);
+  --primary: oklch(0.52 0.2 295);
   --primary-foreground: oklch(0.99 0.003 270);
   --secondary: oklch(0.96 0.008 270);
   --secondary-foreground: oklch(0.18 0.014 270);
@@ -98,12 +98,18 @@
   --destructive-foreground: oklch(0.99 0.003 270);
   --border: oklch(0.18 0.014 270 / 10%);
   --input: oklch(0.18 0.014 270 / 12%);
-  --ring: oklch(0.52 0.20 295);
+  --ring: oklch(0.52 0.2 295);
 }
 
 @layer base {
-  html, body, #root { height: 100%; }
-  * { border-color: var(--color-border); }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  * {
+    border-color: var(--color-border);
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -111,5 +117,7 @@
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
   }
-  ::selection { background: color-mix(in oklab, var(--primary) 35%, transparent); }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 35%, transparent);
+  }
 }

@@ -16,7 +16,9 @@ export function StatsCards({ jobs }: { jobs: JobApplication[] }) {
       {items.map((s) => (
         <Card key={s.label} className="p-4 bg-card/60 border-border/60">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">{s.label}</span>
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              {s.label}
+            </span>
             <s.icon className={`size-4 ${s.tone}`} />
           </div>
           <div className="mt-2 text-2xl font-semibold tracking-tight">{s.value}</div>
