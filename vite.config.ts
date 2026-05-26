@@ -13,4 +13,14 @@ export default defineConfig({
   tanstackStart: {
     server: { preset: "vercel" },
   },
+  vite: {
+    environments: {
+      client: {
+        build: { outDir: ".output/public" },
+      },
+      ssr: {
+        build: { outDir: ".output/server" },
+      },
+    },
+  },
 });
