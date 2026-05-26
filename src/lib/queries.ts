@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabase";
-import type { JobApplication, OptionCategory, UserOption } from "./types";
+import type { JobApplication, OptionCategory, UserOption, Resume } from "./types";
 
 // ---------- Jobs ----------
 export function useJobs(userId: string | undefined) {
@@ -121,5 +121,91 @@ export function useDeleteOption(userId: string | undefined) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["options", userId] }),
+  });
+}
+
+// ---------- Resumes ----------
+export function useResumes(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["resumes", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("resumes")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Resume[];
+    },
+  });
+}
+
+export function useUploadResume(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (file: File) => {
+      if (!userId) throw new Error("Not authenticated");
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("resumes")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data, error } = await supabase
+        .from("resumes")
+        .insert({
+          user_id: userId,
+          name: file.name,
+          file_path: fileName,
+          size: file.size,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        await supabase.storage.from("resumes").remove([fileName]);
+        throw error;
+      }
+
+      return data as Resume;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["resumes", userId] });
+    },
+  });
+}
+
+export function useDeleteResume(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (resume: Resume) => {
+      if (!userId) throw new Error("Not authenticated");
+
+      const { error: storageError } = await supabase.storage
+        .from("resumes")
+        .remove([resume.file_path]);
+
+      if (storageError && !storageError.message.includes("Object not found")) {
+        throw storageError;
+      }
+
+      const { error } = await supabase
+        .from("resumes")
+        .delete()
+        .eq("id", resume.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["resumes", userId] });
+      qc.invalidateQueries({ queryKey: ["jobs", userId] });
+    },
   });
 }

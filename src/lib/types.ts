@@ -1,5 +1,14 @@
 export type OptionCategory = "status" | "platform" | "work_type" | "role";
 
+export interface Resume {
+  id: string;
+  user_id: string;
+  name: string;
+  file_path: string;
+  size: number;
+  created_at: string;
+}
+
 export interface JobApplication {
   id: string;
   user_id: string;
@@ -15,6 +24,7 @@ export interface JobApplication {
   applied_at: string;
   created_at: string;
   updated_at: string;
+  resume_id: string | null;
 }
 
 export interface UserOption {

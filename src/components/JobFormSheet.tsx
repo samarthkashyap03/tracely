@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "./Combobox";
-import { useAddOption, useCreateJob, useOptions, useUpdateJob } from "@/lib/queries";
+import { useAddOption, useCreateJob, useOptions, useUpdateJob, useResumes } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
 import type { JobApplication, OptionCategory } from "@/lib/types";
 import { toast } from "sonner";
@@ -33,11 +33,13 @@ const empty: Partial<JobApplication> = {
   salary: "",
   url: "",
   notes: "",
+  resume_id: null,
 };
 
 export function JobFormSheet({ open, onOpenChange, editing }: Props) {
   const { user } = useAuth();
   const { data: options = [] } = useOptions(user?.id);
+  const { data: resumes = [] } = useResumes(user?.id);
   const create = useCreateJob(user?.id);
   const update = useUpdateJob(user?.id);
   const addOption = useAddOption(user?.id);
@@ -53,15 +55,31 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
 
   const byCat = (c: OptionCategory) => options.filter((o) => o.category === c).map((o) => o.value);
 
-  const handleCreate = (cat: OptionCategory) => async (value: string) => {
-    if (!value) return;
-    await addOption.mutateAsync({ category: cat, value });
-  };
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.company_name?.trim()) return toast.error("Company name required");
     try {
+      // Save custom typed options to database in background
+      const categories: { key: "role" | "status" | "work_type" | "platform"; cat: OptionCategory }[] = [
+        { key: "role", cat: "role" },
+        { key: "status", cat: "status" },
+        { key: "work_type", cat: "work_type" },
+        { key: "platform", cat: "platform" },
+      ];
+
+      for (const { key, cat } of categories) {
+        const val = form[key];
+        if (typeof val === "string" && val.trim()) {
+          const trimmed = val.trim();
+          const exists = options.some(
+            (o) => o.category === cat && o.value.toLowerCase() === trimmed.toLowerCase()
+          );
+          if (!exists) {
+            addOption.mutate({ category: cat, value: trimmed });
+          }
+        }
+      }
+
       if (editing) {
         await update.mutateAsync({ id: editing.id, ...form });
         toast.success("Updated");
@@ -103,7 +121,6 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
               value={form.role}
               onChange={(v) => set("role", v)}
               options={byCat("role")}
-              onCreate={handleCreate("role")}
               placeholder="e.g. Gen AI Engineer"
             />
           </Field>
@@ -114,7 +131,6 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
                 value={form.status}
                 onChange={(v) => set("status", v)}
                 options={byCat("status")}
-                onCreate={handleCreate("status")}
               />
             </Field>
             <Field label="Work type">
@@ -122,7 +138,6 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
                 value={form.work_type}
                 onChange={(v) => set("work_type", v)}
                 options={byCat("work_type")}
-                onCreate={handleCreate("work_type")}
                 placeholder="Remote / Hybrid"
               />
             </Field>
@@ -133,7 +148,6 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
               value={form.platform}
               onChange={(v) => set("platform", v)}
               options={byCat("platform")}
-              onCreate={handleCreate("platform")}
               placeholder="LinkedIn, Stepstone…"
             />
           </Field>
@@ -162,6 +176,21 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
               onChange={(e) => set("url", e.target.value)}
               placeholder="https://…"
             />
+          </Field>
+
+          <Field label="Resume used">
+            <select
+              value={form.resume_id ?? ""}
+              onChange={(e) => set("resume_id", e.target.value || null)}
+              className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+            >
+              <option value="" className="bg-card text-foreground">No Resume Linked</option>
+              {resumes.map((r) => (
+                <option key={r.id} value={r.id} className="bg-card text-foreground">
+                  {r.name}
+                </option>
+              ))}
+            </select>
           </Field>
 
           {editing && (
