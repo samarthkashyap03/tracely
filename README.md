@@ -1,4 +1,4 @@
-# Career Compass - Job Application Tracker
+# Tracely - Job Application Tracker
 
 A clean, responsive web application to track and manage job applications. It helps you organize your job search, see application statistics, and manage custom options (like categories, job statuses, and tags) all in one place.
 
