@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { format, formatDistanceToNow } from "date-fns";
-import { Pencil, Trash2, ExternalLink, Search, FileText } from "lucide-react";
+import { format } from "date-fns";
+import { Pencil, Trash2, ExternalLink, Search, FileText, StickyNote } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "./StatusBadge";
@@ -67,21 +68,50 @@ export function JobTable({ jobs, onEdit }: Props) {
       toast.error(err.message || "Failed to download file");
     }
   };
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [platformFilter, setPlatformFilter] = useState<string>("all");
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const statuses = useMemo(() => Array.from(new Set(jobs.map((j) => j.status))), [jobs]);
+  const platforms = useMemo(() => Array.from(new Set(jobs.map((j) => j.platform).filter(Boolean))), [jobs]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return jobs.filter((j) => {
-      if (statusFilter && j.status !== statusFilter) return false;
-      if (!needle) return true;
-      return [j.company_name, j.role, j.platform, j.location]
-        .filter(Boolean)
-        .some((v) => v!.toLowerCase().includes(needle));
+      // Search text filter
+      if (needle) {
+        const matchesSearch = [j.company_name, j.role, j.platform, j.location]
+          .filter(Boolean)
+          .some((v) => v!.toLowerCase().includes(needle));
+        if (!matchesSearch) return false;
+      }
+      
+      // Status filter
+      if (statusFilter !== "all" && j.status !== statusFilter) return false;
+      
+      // Platform filter
+      if (platformFilter !== "all" && j.platform !== platformFilter) return false;
+      
+      // Time filter
+      if (timeFilter !== "all") {
+        const appliedTime = new Date(j.applied_at).getTime();
+        const nowTime = new Date().getTime();
+        const timeDiff = nowTime - appliedTime;
+        
+        if (timeFilter === "today") {
+          const isToday = new Date(j.applied_at).toDateString() === new Date().toDateString();
+          if (!isToday) return false;
+        } else if (timeFilter === "week") {
+          if (timeDiff > 7 * 24 * 60 * 60 * 1000) return false;
+        } else if (timeFilter === "month") {
+          if (timeDiff > 30 * 24 * 60 * 60 * 1000) return false;
+        }
+      }
+      
+      return true;
     });
-  }, [jobs, q, statusFilter]);
+  }, [jobs, q, statusFilter, platformFilter, timeFilter]);
 
   const onConfirmDelete = async () => {
     if (!confirmId) return;
@@ -96,26 +126,71 @@ export function JobTable({ jobs, onEdit }: Props) {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-xs">
+    <TooltipProvider delayDuration={200}>
+      <div className="space-y-3">
+      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between pb-1">
+        <div className="relative w-full md:max-w-xs">
           <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search company, role, platform…"
-            className="pl-8"
+            className="pl-8 h-9"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          <FilterChip active={statusFilter === null} onClick={() => setStatusFilter(null)}>
-            All
-          </FilterChip>
-          {statuses.map((s) => (
-            <FilterChip key={s} active={statusFilter === s} onClick={() => setStatusFilter(s)}>
-              {s}
-            </FilterChip>
-          ))}
+        <div className="flex flex-wrap gap-2 items-center">
+          <select
+            value={timeFilter}
+            onChange={(e) => setTimeFilter(e.target.value)}
+            className="h-9 rounded-md border border-input bg-card/65 px-2.5 py-1 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[110px]"
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">Past 7 Days</option>
+            <option value="month">Past 30 Days</option>
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-9 rounded-md border border-input bg-card/65 px-2.5 py-1 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[110px]"
+          >
+            <option value="all">All Statuses</option>
+            {statuses.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={platformFilter}
+            onChange={(e) => setPlatformFilter(e.target.value)}
+            className="h-9 rounded-md border border-input bg-card/65 px-2.5 py-1 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[110px]"
+          >
+            <option value="all">All Platforms</option>
+            {platforms.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+
+          {(timeFilter !== "all" || statusFilter !== "all" || platformFilter !== "all" || q.trim() !== "") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setTimeFilter("all");
+                setStatusFilter("all");
+                setPlatformFilter("all");
+                setQ("");
+              }}
+              className="h-9 text-xs px-2.5 hover:bg-accent/40"
+            >
+              Clear
+            </Button>
+          )}
         </div>
       </div>
 
@@ -144,21 +219,50 @@ export function JobTable({ jobs, onEdit }: Props) {
               filtered.map((j) => (
                 <TableRow key={j.id} className="group">
                   <TableCell className="font-medium">
-                    {j.url ? (
-                      <a
-                        href={j.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 hover:text-primary"
-                      >
-                        {j.company_name}
-                        <ExternalLink className="size-3 opacity-0 group-hover:opacity-60" />
-                      </a>
-                    ) : (
-                      j.company_name
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {j.notes && j.notes.trim() ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-1.5 cursor-help">
+                              {j.url ? (
+                                <a
+                                  href={j.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1 hover:text-primary"
+                                >
+                                  {j.company_name}
+                                  <ExternalLink className="size-3 opacity-0 group-hover:opacity-60" />
+                                </a>
+                              ) : (
+                                <span className="hover:text-primary transition-colors">{j.company_name}</span>
+                              )}
+                              <StickyNote className="size-3.5 text-amber-400 shrink-0 animate-pulse" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs whitespace-pre-wrap break-words bg-card text-foreground border border-border/80 shadow-md p-3 text-xs rounded-lg">
+                            <div className="font-semibold text-primary mb-1 text-[10px] uppercase tracking-wider">Note</div>
+                            {j.notes}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        j.url ? (
+                          <a
+                            href={j.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 hover:text-primary"
+                          >
+                            {j.company_name}
+                            <ExternalLink className="size-3 opacity-0 group-hover:opacity-60" />
+                          </a>
+                        ) : (
+                          j.company_name
+                        )
+                      )}
+                    </div>
                     {j.location && (
-                      <div className="text-xs text-muted-foreground">{j.location}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{j.location}</div>
                     )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">{j.role || "—"}</TableCell>
@@ -191,7 +295,7 @@ export function JobTable({ jobs, onEdit }: Props) {
                     className="text-muted-foreground"
                     title={format(new Date(j.applied_at), "PPpp")}
                   >
-                    {formatDistanceToNow(new Date(j.applied_at), { addSuffix: true })}
+                    {format(new Date(j.applied_at), "dd/MM/yy")}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="inline-flex gap-1">
@@ -222,30 +326,9 @@ export function JobTable({ jobs, onEdit }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
 
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={
-        "rounded-full border px-3 py-1 text-xs transition " +
-        (active
-          ? "bg-primary text-primary-foreground border-primary"
-          : "border-border text-muted-foreground hover:text-foreground hover:bg-accent/50")
-      }
-    >
-      {children}
-    </button>
-  );
-}
+
