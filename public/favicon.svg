@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Rounded background square with a premium violet/purple gradient -->
+  <rect x="2" y="2" width="28" height="28" rx="7.5" fill="url(#tracely-gradient)"/>
+  
+  <!-- Briefcase Icon -->
+  <path d="M13 12V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="7" y="12" width="18" height="12" rx="2" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M7 16h18" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14 16v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <defs>
+    <!-- Gradient matching the oklch(0.72 0.18 295) primary theme -->
+    <linearGradient id="tracely-gradient" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c084fc"/> <!-- Light violet -->
+      <stop offset="50%" stop-color="#a855f7"/> <!-- Medium violet -->
+      <stop offset="100%" stop-color="#7c3aed"/> <!-- Deep purple/violet -->
+    </linearGradient>
+  </defs>
+</svg>

@@ -5,7 +5,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "Tracely — Premium Job Application Tracker" },
+      { title: "Tracely — Job Application Tracker" },
       {
         name: "description",
         content:
