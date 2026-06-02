@@ -74,7 +74,7 @@ export function JobTable({ jobs, onEdit }: Props) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const statuses = useMemo(() => Array.from(new Set(jobs.map((j) => j.status))), [jobs]);
-  const platforms = useMemo(() => Array.from(new Set(jobs.map((j) => j.platform).filter(Boolean))), [jobs]);
+  const platforms = useMemo(() => Array.from(new Set(jobs.map((j) => j.platform).filter((p): p is string => !!p))), [jobs]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();

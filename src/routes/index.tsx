@@ -85,6 +85,11 @@ function Landing() {
                 body: "Sort, filter, search. No cognitive overload — just the columns that matter.",
               },
               {
+                icon: Sparkles,
+                title: "AI Auto-fill",
+                body: "Paste any job description and let Groq AI automatically extract and fill company, role, salary, location, and key requirements.",
+              },
+              {
                 icon: BarChart3,
                 title: "Visual analytics",
                 body: "View charts showing your applications growth, conversion rates, and top platforms.",
@@ -95,17 +100,12 @@ function Landing() {
                 body: "Upload, preview, and download your resumes, neatly organized and linked to applications.",
               },
               {
-                icon: Zap,
-                title: "Custom fields",
-                body: "Add your own platforms, statuses, work types, and roles. Make it yours.",
-              },
-              {
                 icon: Lock,
                 title: "Your data, secured",
                 body: "Row-level security on Supabase. Only you can see your applications.",
               },
               {
-                icon: Sparkles,
+                icon: Zap,
                 title: "Premium feel",
                 body: "Dark by default. Designed to feel calm even when your inbox isn't.",
               },

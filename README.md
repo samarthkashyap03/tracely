@@ -12,6 +12,7 @@ A clean, responsive web application to track and manage job applications. It hel
 
 ## Key Features
 
+*   **AI Auto-Fill:** Paste any job description (JD) and company name, and let Groq AI automatically extract and fill company name, job title, location, salary range, work type (Remote/Hybrid/On-site), platform, and key requirements.
 *   **Dashboard & Statistics:** Real-time counters showing total applications, interviews scheduled, offers received, and rejections.
 *   **Job Tracking Table:** Filter, search, and manage roles with details such as company name, job title, salary, status, application date, and notes.
 *   **Custom Options Manager:** Manage status options, platforms, and other drop-down categories dynamically.
@@ -36,6 +37,7 @@ Create a `.env` file in the root directory (based on `.env.example`):
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_GROQ_API_KEY=your-groq-api-key # Optional: key can also be configured dynamically in settings
 ```
 Replace the values with your actual Supabase Project URL and Anon Public Key from the Supabase Dashboard (Settings > API).
 

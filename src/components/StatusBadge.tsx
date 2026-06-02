@@ -8,7 +8,7 @@ const map: Record<string, string> = {
   rejected: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
-export function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({ status, className }: { status: string; className?: string }) {
   const key = status.toLowerCase();
   const cls = map[key] ?? "bg-muted text-muted-foreground border-border";
   return (
@@ -16,6 +16,7 @@ export function StatusBadge({ status }: { status: string }) {
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
         cls,
+        className
       )}
     >
       {status}
