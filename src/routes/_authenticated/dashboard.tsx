@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, BarChart3, StickyNote } from "lucide-react";
+import { Plus, BarChart3, StickyNote, Download, Info, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,9 @@ import { StatsCards } from "@/components/StatsCards";
 import { QuickNotes } from "@/components/QuickNotes";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import type { JobApplication } from "@/lib/types";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { generateJobLogMarkdown } from "@/lib/logUtils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
@@ -32,6 +35,44 @@ function DashboardPage() {
     setOpen(true);
   };
 
+  const handleDownloadLog = () => {
+    if (jobs.length === 0) {
+      toast.error("No applications to download");
+      return;
+    }
+    try {
+      const markdown = generateJobLogMarkdown(jobs);
+      const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `job_applications_log_${new Date().toISOString().slice(0, 10)}.md`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("Job log downloaded successfully!");
+    } catch (error) {
+      console.error("Failed to download log:", error);
+      toast.error("Failed to download job log");
+    }
+  };
+
+  const handleCopyLogToClipboard = async () => {
+    if (jobs.length === 0) {
+      toast.error("No applications to copy");
+      return;
+    }
+    try {
+      const markdown = generateJobLogMarkdown(jobs);
+      await navigator.clipboard.writeText(markdown);
+      toast.success("AI-ready job log copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy log:", error);
+      toast.error("Failed to copy job log to clipboard");
+    }
+  };
+
   return (
     <main className="mx-auto max-w-7xl px-6 py-8 space-y-6">
       {!isSupabaseConfigured && (
@@ -49,7 +90,7 @@ function DashboardPage() {
             Every role you've applied to, in one place.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link
             to="/analytics"
             className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card hover:bg-accent/80 px-4 text-sm font-medium text-foreground transition"
@@ -59,6 +100,47 @@ function DashboardPage() {
           <Button variant="outline" onClick={() => setNotesOpen(true)} className="flex items-center gap-2 h-9">
             <StickyNote className="size-4 text-primary" /> Notes
           </Button>
+
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              onClick={handleDownloadLog}
+              className="flex items-center gap-2 h-9"
+              disabled={jobs.length === 0}
+            >
+              <Download className="size-4 text-primary" /> Download Log
+            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="h-9 w-9 p-0 flex items-center justify-center" aria-label="About Download Log feature">
+                  <Info className="size-4 text-muted-foreground hover:text-foreground transition-colors" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4 border border-border/80 bg-card text-card-foreground shadow-lg rounded-xl">
+                <div className="space-y-2.5">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-1.5">
+                    <Info className="size-4 text-primary" /> AI Analytics Log
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    This feature formats your complete job search history into a structured Markdown table pre-configured with a custom AI prompt.
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    Simply download the log file or copy it using the button below, then paste it directly into ChatGPT, Claude, Gemini, or other AI systems to analyze your response rates, platforms, and get career strategy advice.
+                  </p>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full text-xs flex items-center justify-center gap-1.5 h-8 mt-1"
+                    onClick={handleCopyLogToClipboard}
+                    disabled={jobs.length === 0}
+                  >
+                    <Copy className="size-3.5" /> Copy Log to Clipboard
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
           <Button onClick={openNew}>
             <Plus className="size-4" /> Add application
           </Button>
