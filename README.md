@@ -1,29 +1,68 @@
 # Tracely - Job Application Tracker
 
-A clean, responsive web application to track and manage job applications. It helps you organize your job search, see application statistics, and manage custom options (like categories, job statuses, and tags) all in one place.
+Job hunting is a full-time job. Between copy-pasting descriptions, keeping track of different interviews, and managing chaotic spreadsheets, it's easy to get overwhelmed. 
+
+Tracely is a clean, simple tool built to take the friction out of tracking your job search. It's designed to be fast, minimal, and save you time.
+
+*   No subscriptions, paywalls, or premium tiers. It's completely free and open.
+*   No ads or tracking.
+*   Clean UI that gets out of the way.
+*   Time-saving auto-fill features.
+
+---
 
 ## Tech Stack
 
-*   **Frontend Framework:** React 19
-*   **Styling:** Tailwind CSS v4 & shadcn/ui
-*   **Database & Authentication:** Supabase
-*   **Bundler & Dev Server:** Vite
-*   **Language:** TypeScript
+*   React 19
+*   TanStack Start (with Cloudflare & Vite)
+*   Tailwind CSS v4 & shadcn/ui
+*   Supabase (Database & Authentication)
+*   TypeScript
 
-## Key Features
+---
 
-*   **AI Auto-Fill:** Paste any job description (JD) and company name, and let Groq AI automatically extract and fill company name, job title, location, salary range, work type (Remote/Hybrid/On-site), platform, and key requirements.
-*   **Dashboard & Statistics:** Real-time counters showing total applications, interviews scheduled, offers received, and rejections.
-*   **Job Tracking Table:** Filter, search, and manage roles with details such as company name, job title, salary, status, application date, and notes.
-*   **Custom Options Manager:** Manage status options, platforms, and other drop-down categories dynamically.
-*   **User Authentication:** Secure user sign-up, sign-in, and password recovery powered by Supabase Auth.
-*   **Responsive Layout:** Fits desktop monitors, tablets, and mobile screens.
+## Features
+
+*   **Auto-Fill:** Paste a job description and company name, and the tool extracts the job title, location, salary range, work style (Remote/Hybrid/On-site), platform, and key requirements.
+*   **Stats Dashboard:** Simple counters showing active applications, interviews scheduled, offers, and rejections.
+*   **Job Board:** A filterable, searchable table to manage all your applications and notes in one place.
+*   **Resume Management:** Upload, preview, and download different versions of your resume (PDF or Word format). Link them directly to specific applications so you always know which version you applied with.
+*   **Job Analytics:** Visual insights and charts for your job search, including application growth over time, platform breakdowns, and conversion insights showing which resumes and roles get the most interview callbacks.
+*   **Custom Statuses:** Add or modify application stages, platform names, and tags dynamically.
+*   **Secure Auth:** Secure user authentication powered by Supabase, ensuring your application data remains private to you.
+*   **Responsive:** Works on desktop, tablet, and mobile.
+
+---
+
+## Architecture
+
+Tracely uses a high-performance web architecture designed to keep your data fast and secure:
+
+```mermaid
+graph TD
+    Client["Client App (React 19 / Tailwind / TanStack Query)"]
+    Server["SSR Server (TanStack Start / Cloudflare Router)"]
+    Supabase["Supabase DB & Auth (Row Level Security)"]
+    Groq["Groq API (Llama 3.3 parsing)"]
+
+    Client <-->|Renders UI / Hydrates| Server
+    Client <-->|Secure Session & SQL Queries| Supabase
+    Client -->|Direct Secure Extraction Request| Groq
+```
+
+1.  **Frontend (React 19 & Tailwind CSS v4)**: Uses shadcn/ui components for a clean and responsive UI.
+2.  **Routing & SSR (TanStack Start)**: Manages layouts, server-side rendering, and type-safe routing.
+3.  **State Management (TanStack Query)**: Syncs local UI state with the Supabase database.
+4.  **Database & Authentication (Supabase)**: Handles user login and registration. Row Level Security (RLS) is enabled, meaning users can only access their own data.
+5.  **Description Parser (Groq API)**: Fetches directly from the Groq API on the client side to parse raw job text into structured fields.
+
+---
 
 ## Local Setup
 
 ### 1. Clone the repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/samarthkashyap03/tracely
 cd job-tracker
 ```
 
@@ -49,5 +88,3 @@ Execute the SQL commands in `supabase/schema.sql` inside your Supabase SQL Edito
 npm run dev
 ```
 Open `http://localhost:8080` in your browser.
-
-
