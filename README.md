@@ -1,5 +1,7 @@
 # Tracely - Job Application Tracker
 
+![Dashboard](./public/screenshots/dashboard.png)
+
 Job hunting is a full-time job. Between copy-pasting descriptions, keeping track of different interviews, and managing chaotic spreadsheets, it's easy to get overwhelmed.
 
 Tracely is a clean, simple tool built to take the friction out of tracking your job search. It's designed to be fast, minimal, and save you time.
