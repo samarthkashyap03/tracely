@@ -16,7 +16,7 @@ export function StatusBadge({ status, className }: { status: string; className?:
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
         cls,
-        className
+        className,
       )}
     >
       {status}

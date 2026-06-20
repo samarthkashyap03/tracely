@@ -25,9 +25,7 @@ export function Combobox({
 
   const filtered = React.useMemo(() => {
     if (!inputValue.trim()) return options;
-    return options.filter((o) =>
-      o.toLowerCase().includes(inputValue.toLowerCase())
-    );
+    return options.filter((o) => o.toLowerCase().includes(inputValue.toLowerCase()));
   }, [options, inputValue]);
 
   return (

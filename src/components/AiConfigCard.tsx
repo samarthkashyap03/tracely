@@ -85,14 +85,17 @@ export function AiConfigCard() {
                 Navigate to the <strong>API Keys</strong> tab in the sidebar menu.
               </li>
               <li>
-                Click the <strong>Create API Key</strong> button, give it a name (e.g., "Job Tracker"), and copy the generated key.
+                Click the <strong>Create API Key</strong> button, give it a name (e.g., "Job
+                Tracker"), and copy the generated key.
               </li>
               <li>
-                Paste your key in the API Key field below, choose your preferred model, and click <strong>Save Configuration</strong>.
+                Paste your key in the API Key field below, choose your preferred model, and click{" "}
+                <strong>Save Configuration</strong>.
               </li>
             </ol>
             <p className="mt-2 text-[11px] leading-normal italic text-primary/80">
-              Note: Your API Key is stored safely on your own browser (localStorage) and only sent directly to the Groq API endpoint.
+              Note: Your API Key is stored safely on your own browser (localStorage) and only sent
+              directly to the Groq API endpoint.
             </p>
           </AlertDescription>
         </Alert>

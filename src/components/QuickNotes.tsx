@@ -65,7 +65,11 @@ export function QuickNotes({ isEmbed = false }: { isEmbed?: boolean }) {
         await createNote.mutateAsync(inputText.trim());
         setInputText("");
       } catch (err: any) {
-        if (err.message?.includes("relation") || err.message?.includes("does not exist") || err.message?.includes("404")) {
+        if (
+          err.message?.includes("relation") ||
+          err.message?.includes("does not exist") ||
+          err.message?.includes("404")
+        ) {
           setLocalFallback(true);
           const newNote: UserNote = {
             id: Math.random().toString(36).substring(2, 9),
@@ -87,7 +91,7 @@ export function QuickNotes({ isEmbed = false }: { isEmbed?: boolean }) {
   const handleToggle = async (note: UserNote) => {
     if (localFallback) {
       const updated = localNotes.map((n) =>
-        n.id === note.id ? { ...n, completed: !n.completed } : n
+        n.id === note.id ? { ...n, completed: !n.completed } : n,
       );
       saveLocalNotes(updated);
     } else {
@@ -131,7 +135,8 @@ export function QuickNotes({ isEmbed = false }: { isEmbed?: boolean }) {
 
       {localFallback && (
         <div className="text-[10px] text-amber-500/90 bg-amber-500/5 border border-amber-500/10 rounded p-2 shrink-0 leading-normal">
-          ⚠️ Saving locally. Create the <code className="font-mono text-amber-400">user_notes</code> table in your Supabase SQL editor to sync across devices.
+          ⚠️ Saving locally. Create the <code className="font-mono text-amber-400">user_notes</code>{" "}
+          table in your Supabase SQL editor to sync across devices.
         </div>
       )}
 
@@ -189,7 +194,9 @@ export function QuickNotes({ isEmbed = false }: { isEmbed?: boolean }) {
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <StickyNote className="size-4 text-primary" /> Quick Notes & Tasks
           </h3>
-          <p className="text-xs text-muted-foreground mt-1">Jot down quick reminders or general to-dos.</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Jot down quick reminders or general to-dos.
+          </p>
         </div>
         {innerContent}
       </div>
@@ -202,7 +209,9 @@ export function QuickNotes({ isEmbed = false }: { isEmbed?: boolean }) {
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <StickyNote className="size-4 text-primary" /> Quick Notes & Tasks
         </CardTitle>
-        <CardDescription className="text-xs">Jot down quick reminders or general to-dos.</CardDescription>
+        <CardDescription className="text-xs">
+          Jot down quick reminders or general to-dos.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col min-h-0 pb-4">
         {innerContent}

@@ -19,12 +19,7 @@ import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Sparkles, Loader2, Info, Eye, EyeOff, ExternalLink } from "lucide-react";
-import {
-  getGroqApiKey,
-  setGroqApiKey,
-  getGroqModel,
-  parseJobDescription,
-} from "@/lib/groq";
+import { getGroqApiKey, setGroqApiKey, getGroqModel, parseJobDescription } from "@/lib/groq";
 
 interface Props {
   open: boolean;
@@ -192,7 +187,9 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
           onChange={(e) => set("resume_id", e.target.value || null)}
           className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
         >
-          <option value="" className="bg-card text-foreground">No Resume Linked</option>
+          <option value="" className="bg-card text-foreground">
+            No Resume Linked
+          </option>
           {resumes.map((r) => (
             <option key={r.id} value={r.id} className="bg-card text-foreground">
               {r.name}
@@ -227,7 +224,10 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
     if (!form.company_name?.trim()) return toast.error("Company name required");
     try {
       // Save custom typed options to database in background
-      const categories: { key: "role" | "status" | "work_type" | "platform"; cat: OptionCategory }[] = [
+      const categories: {
+        key: "role" | "status" | "work_type" | "platform";
+        cat: OptionCategory;
+      }[] = [
         { key: "role", cat: "role" },
         { key: "status", cat: "status" },
         { key: "work_type", cat: "work_type" },
@@ -239,7 +239,7 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
         if (typeof val === "string" && val.trim()) {
           const trimmed = val.trim();
           const exists = options.some(
-            (o) => o.category === cat && o.value.toLowerCase() === trimmed.toLowerCase()
+            (o) => o.category === cat && o.value.toLowerCase() === trimmed.toLowerCase(),
           );
           if (!exists) {
             addOption.mutate({ category: cat, value: trimmed });
@@ -333,7 +333,9 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
                     {showInlineGuide && (
                       <Alert className="bg-primary/5 border-primary/20 text-foreground animate-in fade-in slide-in-from-top-1 duration-200">
                         <Info className="size-4 text-primary" />
-                        <AlertTitle className="text-sm font-semibold mb-1">Setup Instructions:</AlertTitle>
+                        <AlertTitle className="text-sm font-semibold mb-1">
+                          Setup Instructions:
+                        </AlertTitle>
                         <AlertDescription className="text-xs text-muted-foreground space-y-1.5">
                           <ol className="list-decimal pl-4 space-y-1.5 mt-1">
                             <li>
@@ -356,7 +358,9 @@ export function JobFormSheet({ open, onOpenChange, editing }: Props) {
                     )}
 
                     <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">API Key</Label>
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                        API Key
+                      </Label>
                       <div className="relative">
                         <Input
                           type={showTempKey ? "text" : "password"}

@@ -46,7 +46,10 @@ function DashboardPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `job_applications_log_${new Date().toISOString().slice(0, 10)}.md`);
+      link.setAttribute(
+        "download",
+        `job_applications_log_${new Date().toISOString().slice(0, 10)}.md`,
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -97,7 +100,11 @@ function DashboardPage() {
           >
             <BarChart3 className="size-4 text-primary" /> Analytics
           </Link>
-          <Button variant="outline" onClick={() => setNotesOpen(true)} className="flex items-center gap-2 h-9">
+          <Button
+            variant="outline"
+            onClick={() => setNotesOpen(true)}
+            className="flex items-center gap-2 h-9"
+          >
             <StickyNote className="size-4 text-primary" /> Notes
           </Button>
 
@@ -112,7 +119,12 @@ function DashboardPage() {
             </Button>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="h-9 w-9 p-0 flex items-center justify-center" aria-label="About Download Log feature">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 p-0 flex items-center justify-center"
+                  aria-label="About Download Log feature"
+                >
                   <Info className="size-4 text-muted-foreground hover:text-foreground transition-colors" />
                 </Button>
               </PopoverTrigger>
@@ -122,10 +134,13 @@ function DashboardPage() {
                     <Info className="size-4 text-primary" /> AI Analytics Log
                   </h4>
                   <p className="text-xs text-muted-foreground leading-normal">
-                    This feature formats your complete job search history into a structured Markdown table pre-configured with a custom AI prompt.
+                    This feature formats your complete job search history into a structured Markdown
+                    table pre-configured with a custom AI prompt.
                   </p>
                   <p className="text-xs text-muted-foreground leading-normal">
-                    Simply download the log file or copy it using the button below, then paste it directly into ChatGPT, Claude, Gemini, or other AI systems to analyze your response rates, platforms, and get career strategy advice.
+                    Simply download the log file or copy it using the button below, then paste it
+                    directly into ChatGPT, Claude, Gemini, or other AI systems to analyze your
+                    response rates, platforms, and get career strategy advice.
                   </p>
                   <Button
                     variant="secondary"

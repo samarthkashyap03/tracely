@@ -80,7 +80,12 @@ function ResumesPage() {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
 
-    if (!allowedTypes.includes(file.type) && !file.name.endsWith(".docx") && !file.name.endsWith(".doc") && !file.name.endsWith(".pdf")) {
+    if (
+      !allowedTypes.includes(file.type) &&
+      !file.name.endsWith(".docx") &&
+      !file.name.endsWith(".doc") &&
+      !file.name.endsWith(".pdf")
+    ) {
       toast.error("Please upload only PDF or Word documents.");
       return;
     }
@@ -104,9 +109,7 @@ function ResumesPage() {
   const downloadFile = async (resume: Resume) => {
     try {
       const toastId = toast.loading(`Downloading "${resume.name}"...`);
-      const { data, error } = await supabase.storage
-        .from("resumes")
-        .download(resume.file_path);
+      const { data, error } = await supabase.storage.from("resumes").download(resume.file_path);
       toast.dismiss(toastId);
 
       if (error) throw error;
@@ -128,9 +131,7 @@ function ResumesPage() {
   const previewFile = async (resume: Resume) => {
     try {
       const toastId = toast.loading(`Opening preview for "${resume.name}"...`);
-      const { data, error } = await supabase.storage
-        .from("resumes")
-        .download(resume.file_path);
+      const { data, error } = await supabase.storage.from("resumes").download(resume.file_path);
       toast.dismiss(toastId);
 
       if (error) throw error;
@@ -210,9 +211,7 @@ function ResumesPage() {
             <p className="text-sm font-medium">
               {upload.isPending ? "Uploading document..." : "Click to upload or drag & drop"}
             </p>
-            <p className="text-xs text-muted-foreground">
-              PDF or Word formats only (Max 10MB)
-            </p>
+            <p className="text-xs text-muted-foreground">PDF or Word formats only (Max 10MB)</p>
           </div>
         </div>
       </div>
@@ -351,8 +350,8 @@ function ResumesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete resume?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deletingResume?.name}"? This will remove the file from
-              storage and unlink it from any job applications.
+              Are you sure you want to delete "{deletingResume?.name}"? This will remove the file
+              from storage and unlink it from any job applications.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

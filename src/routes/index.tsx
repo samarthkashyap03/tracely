@@ -1,5 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Briefcase, CheckCircle2, LayoutGrid, Lock, Sparkles, Zap, FileText, BarChart3 } from "lucide-react";
+import {
+  Briefcase,
+  CheckCircle2,
+  LayoutGrid,
+  Lock,
+  Sparkles,
+  Zap,
+  FileText,
+  BarChart3,
+} from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -56,7 +65,8 @@ function Landing() {
               Every application. <span className="text-primary">One quiet dashboard.</span>
             </h1>
             <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Track applications without spreadsheet chaos. Organize your resumes, link them to specific jobs, and view visual analytics in one calm, secure dashboard.
+              Track applications without spreadsheet chaos. Organize your resumes, link them to
+              specific jobs, and view visual analytics in one calm, secure dashboard.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3">
               <Link

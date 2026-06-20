@@ -149,12 +149,10 @@ export function useUploadResume(userId: string | undefined) {
       const fileExt = file.name.split(".").pop();
       const fileName = `${userId}/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("resumes")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      const { error: uploadError } = await supabase.storage.from("resumes").upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
 
       if (uploadError) throw uploadError;
 
@@ -196,10 +194,7 @@ export function useDeleteResume(userId: string | undefined) {
         throw storageError;
       }
 
-      const { error } = await supabase
-        .from("resumes")
-        .delete()
-        .eq("id", resume.id);
+      const { error } = await supabase.from("resumes").delete().eq("id", resume.id);
 
       if (error) throw error;
     },
@@ -246,7 +241,15 @@ export function useCreateNote(userId: string | undefined) {
 export function useUpdateNote(userId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, completed, content }: { id: string; completed?: boolean; content?: string }) => {
+    mutationFn: async ({
+      id,
+      completed,
+      content,
+    }: {
+      id: string;
+      completed?: boolean;
+      content?: string;
+    }) => {
       const patch: any = {};
       if (completed !== undefined) patch.completed = completed;
       if (content !== undefined) patch.content = content;

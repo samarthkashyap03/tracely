@@ -17,16 +17,16 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Layers, 
-  PieChartIcon, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  BarChart3,
+  TrendingUp,
+  Layers,
+  PieChartIcon,
+  CheckCircle2,
+  XCircle,
   Calendar,
   ChevronLeft,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -36,10 +36,10 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 
 const COLORS = [
   "oklch(0.72 0.18 295)", // primary / violet
-  "oklch(0.7 0.14 230)",  // info / blue
+  "oklch(0.7 0.14 230)", // info / blue
   "oklch(0.72 0.17 155)", // success / green
-  "oklch(0.8 0.16 80)",   // warning / yellow
-  "oklch(0.62 0.22 25)",  // destructive / red
+  "oklch(0.8 0.16 80)", // warning / yellow
+  "oklch(0.62 0.22 25)", // destructive / red
 ];
 
 function AnalyticsPage() {
@@ -51,10 +51,12 @@ function AnalyticsPage() {
   // 1. Calculations & KPI metrics
   const stats = React.useMemo(() => {
     const total = jobs.length;
-    const interviews = jobs.filter(j => j.status.toLowerCase() === "interview" || j.status.toLowerCase() === "under process").length;
-    const offers = jobs.filter(j => j.status.toLowerCase() === "offer").length;
-    const rejected = jobs.filter(j => j.status.toLowerCase() === "rejected").length;
-    
+    const interviews = jobs.filter(
+      (j) => j.status.toLowerCase() === "interview" || j.status.toLowerCase() === "under process",
+    ).length;
+    const offers = jobs.filter((j) => j.status.toLowerCase() === "offer").length;
+    const rejected = jobs.filter((j) => j.status.toLowerCase() === "rejected").length;
+
     const interviewRate = total > 0 ? ((interviews / total) * 100).toFixed(0) : "0";
     const successRate = total > 0 ? ((offers / total) * 100).toFixed(0) : "0";
 
@@ -64,7 +66,7 @@ function AnalyticsPage() {
   // 2. Status Data for Donut Chart
   const statusData = React.useMemo(() => {
     const counts: Record<string, number> = {};
-    jobs.forEach(j => {
+    jobs.forEach((j) => {
       counts[j.status] = (counts[j.status] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
@@ -73,7 +75,7 @@ function AnalyticsPage() {
   // 3. Platform Data for Bar Chart
   const platformData = React.useMemo(() => {
     const counts: Record<string, number> = {};
-    jobs.forEach(j => {
+    jobs.forEach((j) => {
       const plat = j.platform || "Direct / Other";
       counts[plat] = (counts[plat] || 0) + 1;
     });
@@ -86,13 +88,13 @@ function AnalyticsPage() {
   // 4. Cumulative timeline data
   const timelineData = React.useMemo(() => {
     const sortedJobs = [...jobs].sort(
-      (a, b) => new Date(a.applied_at).getTime() - new Date(b.applied_at).getTime()
+      (a, b) => new Date(a.applied_at).getTime() - new Date(b.applied_at).getTime(),
     );
     const counts: Record<string, number> = {};
     let cumulative = 0;
-    
+
     const data: { date: string; count: number; cumulative: number }[] = [];
-    
+
     sortedJobs.forEach((j) => {
       const dateStr = new Date(j.applied_at).toLocaleDateString("en-US", {
         month: "short",
@@ -100,12 +102,12 @@ function AnalyticsPage() {
       });
       counts[dateStr] = (counts[dateStr] || 0) + 1;
     });
-    
+
     Object.entries(counts).forEach(([date, count]) => {
       cumulative += count;
       data.push({ date, count, cumulative });
     });
-    
+
     return data;
   }, [jobs]);
 
@@ -113,8 +115,8 @@ function AnalyticsPage() {
   const topRoleInfo = React.useMemo(() => {
     const roleStats: Record<string, { total: number; responses: number }> = {};
     const responseStatuses = ["interview", "offer", "under process"];
-    
-    jobs.forEach(j => {
+
+    jobs.forEach((j) => {
       const role = j.role || "Not Specified";
       if (!roleStats[role]) {
         roleStats[role] = { total: 0, responses: 0 };
@@ -144,12 +146,12 @@ function AnalyticsPage() {
   const topResumeInfo = React.useMemo(() => {
     const resumeStats: Record<string, { total: number; responses: number }> = {};
     const responseStatuses = ["interview", "offer", "under process"];
-    
-    jobs.forEach(j => {
+
+    jobs.forEach((j) => {
       if (!j.resume_id) return;
-      const resume = resumes.find(r => r.id === j.resume_id);
+      const resume = resumes.find((r) => r.id === j.resume_id);
       const resumeName = resume ? resume.name : "Unknown Resume";
-      
+
       if (!resumeStats[resumeName]) {
         resumeStats[resumeName] = { total: 0, responses: 0 };
       }
@@ -191,7 +193,8 @@ function AnalyticsPage() {
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">No analytics available</h1>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Once you add job applications to your dashboard, we'll generate visual analyses of your applications, conversion rates, and trends.
+            Once you add job applications to your dashboard, we'll generate visual analyses of your
+            applications, conversion rates, and trends.
           </p>
         </div>
         <Link
@@ -207,8 +210,8 @@ function AnalyticsPage() {
   return (
     <main className="mx-auto max-w-7xl px-6 py-8 space-y-6">
       <div className="flex items-center gap-2">
-        <Link 
-          to="/dashboard" 
+        <Link
+          to="/dashboard"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mr-2"
         >
           <ChevronLeft className="size-4" /> Back to Dashboard
@@ -225,7 +228,9 @@ function AnalyticsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-card/40 border-border/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Applications</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Applications
+            </CardTitle>
             <Calendar className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -236,23 +241,31 @@ function AnalyticsPage() {
 
         <Card className="bg-card/40 border-border/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Interviews Scheduled</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Interviews Scheduled
+            </CardTitle>
             <Layers className="size-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">{stats.interviews}</div>
-            <p className="text-xs text-muted-foreground mt-1">{stats.interviewRate}% interview conversion rate</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.interviewRate}% interview conversion rate
+            </p>
           </CardContent>
         </Card>
 
         <Card className="bg-card/40 border-border/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Offers Received</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Offers Received
+            </CardTitle>
             <CheckCircle2 className="size-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">{stats.offers}</div>
-            <p className="text-xs text-muted-foreground mt-1">{stats.successRate}% offer conversion rate</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.successRate}% offer conversion rate
+            </p>
           </CardContent>
         </Card>
 
@@ -283,23 +296,31 @@ function AnalyticsPage() {
               <AreaChart data={timelineData}>
                 <defs>
                   <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="oklch(0.72 0.18 295)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="oklch(0.72 0.18 295)" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="oklch(0.72 0.18 295)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="oklch(0.72 0.18 295)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" stroke="oklch(0.68 0.02 270 / 40%)" fontSize={11} tickLine={false} />
+                <XAxis
+                  dataKey="date"
+                  stroke="oklch(0.68 0.02 270 / 40%)"
+                  fontSize={11}
+                  tickLine={false}
+                />
                 <YAxis stroke="oklch(0.68 0.02 270 / 40%)" fontSize={11} tickLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "oklch(0.2 0.014 270)", borderColor: "oklch(1 0 0 / 8%)" }}
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "oklch(0.2 0.014 270)",
+                    borderColor: "oklch(1 0 0 / 8%)",
+                  }}
                   labelStyle={{ color: "var(--foreground)" }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="cumulative" 
-                  stroke="oklch(0.72 0.18 295)" 
+                <Area
+                  type="monotone"
+                  dataKey="cumulative"
+                  stroke="oklch(0.72 0.18 295)"
                   strokeWidth={2}
-                  fillOpacity={1} 
-                  fill="url(#colorCumulative)" 
+                  fillOpacity={1}
+                  fill="url(#colorCumulative)"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -329,19 +350,27 @@ function AnalyticsPage() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: "oklch(0.2 0.014 270)", borderColor: "oklch(1 0 0 / 8%)" }}
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "oklch(0.2 0.014 270)",
+                      borderColor: "oklch(1 0 0 / 8%)",
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            
+
             {/* Status Legend */}
             <div className="flex flex-wrap gap-2 justify-center text-xs pb-2">
               {statusData.map((entry, index) => (
                 <div key={entry.name} className="flex items-center gap-1.5">
-                  <span className="size-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                  <span className="text-muted-foreground">{entry.name} ({entry.value})</span>
+                  <span
+                    className="size-2.5 rounded-full"
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  />
+                  <span className="text-muted-foreground">
+                    {entry.name} ({entry.value})
+                  </span>
                 </div>
               ))}
             </div>
@@ -359,10 +388,25 @@ function AnalyticsPage() {
           <CardContent className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={platformData} layout="vertical">
-                <XAxis type="number" stroke="oklch(0.68 0.02 270 / 40%)" fontSize={11} tickLine={false} />
-                <YAxis dataKey="name" type="category" stroke="oklch(0.68 0.02 270 / 40%)" fontSize={11} width={100} tickLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "oklch(0.2 0.014 270)", borderColor: "oklch(1 0 0 / 8%)" }}
+                <XAxis
+                  type="number"
+                  stroke="oklch(0.68 0.02 270 / 40%)"
+                  fontSize={11}
+                  tickLine={false}
+                />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  stroke="oklch(0.68 0.02 270 / 40%)"
+                  fontSize={11}
+                  width={100}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "oklch(0.2 0.014 270)",
+                    borderColor: "oklch(1 0 0 / 8%)",
+                  }}
                 />
                 <Bar dataKey="value" fill="oklch(0.72 0.18 295)" radius={[0, 4, 4, 0]}>
                   {platformData.map((entry, index) => (
@@ -384,24 +428,33 @@ function AnalyticsPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
             <div className="space-y-1.5 p-3 rounded-lg bg-accent/20 border border-border/30">
-              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Top Performing Role</div>
-              <div className="text-sm font-semibold text-foreground truncate">{topRoleInfo.name}</div>
+              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                Top Performing Role
+              </div>
+              <div className="text-sm font-semibold text-foreground truncate">
+                {topRoleInfo.name}
+              </div>
               <div className="text-xs text-muted-foreground">
-                {topRoleInfo.responses > 0 
+                {topRoleInfo.responses > 0
                   ? `${topRoleInfo.responses} response${topRoleInfo.responses > 1 ? "s" : ""} from ${topRoleInfo.total} application${topRoleInfo.total > 1 ? "s" : ""} (${((topRoleInfo.responses / topRoleInfo.total) * 100).toFixed(0)}%)`
-                  : "No responses recorded yet"
-                }
+                  : "No responses recorded yet"}
               </div>
             </div>
 
             <div className="space-y-1.5 p-3 rounded-lg bg-accent/20 border border-border/30">
-              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Top Performing Resume</div>
-              <div className="text-sm font-semibold text-foreground truncate" title={topResumeInfo.name}>{topResumeInfo.name}</div>
+              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                Top Performing Resume
+              </div>
+              <div
+                className="text-sm font-semibold text-foreground truncate"
+                title={topResumeInfo.name}
+              >
+                {topResumeInfo.name}
+              </div>
               <div className="text-xs text-muted-foreground">
-                {topResumeInfo.responses > 0 
+                {topResumeInfo.responses > 0
                   ? `${topResumeInfo.responses} response${topResumeInfo.responses > 1 ? "s" : ""} from ${topResumeInfo.total} application${topResumeInfo.total > 1 ? "s" : ""} (${((topResumeInfo.responses / topResumeInfo.total) * 100).toFixed(0)}%)`
-                  : "No responses recorded yet"
-                }
+                  : "No responses recorded yet"}
               </div>
             </div>
           </CardContent>

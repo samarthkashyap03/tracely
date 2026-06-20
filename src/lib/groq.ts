@@ -87,10 +87,13 @@ Return ONLY the JSON object. Do not include any explanation or markdown formatti
         model,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Please parse this job description and return the structured JSON data:\n\n${text}` }
+          {
+            role: "user",
+            content: `Please parse this job description and return the structured JSON data:\n\n${text}`,
+          },
         ],
         temperature: 0.1,
-        response_format: { type: "json_object" }
+        response_format: { type: "json_object" },
       }),
     });
 
