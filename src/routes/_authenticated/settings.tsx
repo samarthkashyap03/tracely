@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { OptionsManager } from "@/components/OptionsManager";
 import { AiConfigCard } from "@/components/AiConfigCard";
+import { GmailAgentCard } from "@/components/GmailAgentCard";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -16,6 +17,7 @@ function SettingsPage() {
         </p>
       </div>
       <AiConfigCard />
+      <GmailAgentCard />
       <OptionsManager />
     </main>
   );

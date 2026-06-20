@@ -62,8 +62,8 @@ export function JobTable({ jobs, onEdit }: Props) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to download file");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to download file");
     }
   };
   const [timeFilter, setTimeFilter] = useState<string>("all");

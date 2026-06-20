@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, BarChart3, StickyNote, Download, Info, Copy } from "lucide-react";
+import { Plus, BarChart3, StickyNote, Download, Info, Copy, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useJobs } from "@/lib/queries";
 import { JobTable } from "@/components/JobTable";
 import { JobFormSheet } from "@/components/JobFormSheet";
 import { StatsCards } from "@/components/StatsCards";
 import { QuickNotes } from "@/components/QuickNotes";
+import { GmailAgentCard } from "@/components/GmailAgentCard";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { handleOAuthRedirect } from "@/lib/gmailService";
 import type { JobApplication } from "@/lib/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { generateJobLogMarkdown } from "@/lib/logUtils";
@@ -25,6 +28,38 @@ function DashboardPage() {
   const [open, setOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [editing, setEditing] = useState<JobApplication | null>(null);
+  const [recentUpdates, setRecentUpdates] = useState<
+    Array<{ id: string; company_name: string; role: string | null; updated_at: string }>
+  >([]);
+
+  useEffect(() => {
+    // Check if OAuth redirect was triggered
+    const oauthFound = handleOAuthRedirect();
+    if (oauthFound) {
+      toast.success("Gmail connected successfully!");
+    }
+
+    // Load recent updates from localStorage
+    const saved = localStorage.getItem("tracely_recent_updates");
+    if (saved) {
+      try {
+        setRecentUpdates(JSON.parse(saved));
+      } catch (err) {
+        console.error("Failed to parse recent updates", err);
+      }
+    }
+  }, []);
+
+  const handleScanComplete = () => {
+    const saved = localStorage.getItem("tracely_recent_updates");
+    if (saved) {
+      try {
+        setRecentUpdates(JSON.parse(saved));
+      } catch (err) {
+        console.error("Failed to reload recent updates", err);
+      }
+    }
+  };
 
   const openNew = () => {
     setEditing(null);
@@ -164,11 +199,52 @@ function DashboardPage() {
 
       <StatsCards jobs={jobs} />
 
-      {isLoading ? (
-        <div className="grid place-items-center py-20 text-muted-foreground">Loading…</div>
-      ) : (
-        <JobTable jobs={jobs} onEdit={openEdit} />
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="lg:col-span-2 space-y-6">
+          {isLoading ? (
+            <div className="grid place-items-center py-20 text-muted-foreground">Loading…</div>
+          ) : (
+            <JobTable jobs={jobs} onEdit={openEdit} />
+          )}
+        </div>
+
+        <div className="space-y-6">
+          <GmailAgentCard autoTrigger={true} onScanComplete={handleScanComplete} />
+
+          {recentUpdates.length > 0 && (
+            <Card className="p-5 bg-card/60 border border-border/60 space-y-4">
+              <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                <CheckCircle className="size-4 text-emerald-500" />
+                Recently Updated by Agent
+              </h3>
+              <div className="divide-y divide-border/40">
+                {recentUpdates.map((item, idx) => (
+                  <div key={idx} className="py-2.5 flex items-center justify-between text-xs">
+                    <div>
+                      <div className="font-semibold text-foreground">{item.company_name}</div>
+                      <div className="text-muted-foreground">{item.role || "Role"}</div>
+                    </div>
+                    <span className="bg-destructive/15 text-destructive border border-destructive/30 px-2 py-0.5 rounded-full text-[10px] font-medium">
+                      Status: Rejected
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  localStorage.removeItem("tracely_recent_updates");
+                  setRecentUpdates([]);
+                }}
+              >
+                Clear History
+              </Button>
+            </Card>
+          )}
+        </div>
+      </div>
 
       <JobFormSheet open={open} onOpenChange={setOpen} editing={editing} />
 

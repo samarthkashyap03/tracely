@@ -250,7 +250,7 @@ export function useUpdateNote(userId: string | undefined) {
       completed?: boolean;
       content?: string;
     }) => {
-      const patch: any = {};
+      const patch: { completed?: boolean; content?: string } = {};
       if (completed !== undefined) patch.completed = completed;
       if (content !== undefined) patch.content = content;
       const { data, error } = await supabase

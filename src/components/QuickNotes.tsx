@@ -64,12 +64,9 @@ export function QuickNotes({ isEmbed = false }: { isEmbed?: boolean }) {
       try {
         await createNote.mutateAsync(inputText.trim());
         setInputText("");
-      } catch (err: any) {
-        if (
-          err.message?.includes("relation") ||
-          err.message?.includes("does not exist") ||
-          err.message?.includes("404")
-        ) {
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "";
+        if (msg.includes("relation") || msg.includes("does not exist") || msg.includes("404")) {
           setLocalFallback(true);
           const newNote: UserNote = {
             id: Math.random().toString(36).substring(2, 9),
@@ -82,7 +79,7 @@ export function QuickNotes({ isEmbed = false }: { isEmbed?: boolean }) {
           setInputText("");
           toast.info("Notes saved locally. Run the SQL schema to enable database cloud sync!");
         } else {
-          toast.error(err.message || "Failed to add note");
+          toast.error(err instanceof Error ? err.message : "Failed to add note");
         }
       }
     }

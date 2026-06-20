@@ -101,8 +101,8 @@ function ResumesPage() {
       toast.dismiss(toastId);
       toast.success("Resume uploaded successfully");
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload resume.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload resume.");
     }
   };
 
@@ -123,8 +123,8 @@ function ResumesPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to download file");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to download file");
     }
   };
 
@@ -139,8 +139,8 @@ function ResumesPage() {
 
       const url = URL.createObjectURL(data);
       window.open(url, "_blank");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to preview file");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to preview file");
     }
   };
 
@@ -151,8 +151,8 @@ function ResumesPage() {
       await remove.mutateAsync(deletingResume);
       toast.dismiss(toastId);
       toast.success("Resume deleted");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete resume");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete resume");
     } finally {
       setDeletingResume(null);
     }
