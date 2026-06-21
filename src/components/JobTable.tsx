@@ -62,8 +62,8 @@ export function JobTable({ jobs, onEdit }: Props) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to download file");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to download file");
     }
   };
   const [timeFilter, setTimeFilter] = useState<string>("all");
@@ -128,24 +128,25 @@ export function JobTable({ jobs, onEdit }: Props) {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="space-y-3">
+      <div className="space-y-4">
+        {/* Filters Toolbar */}
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between pb-1">
           <div className="relative w-full md:max-w-xs">
-            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search company, role, platform…"
-              className="pl-8 h-9"
+              className="pl-9 h-9 rounded-lg border-border/60 bg-background/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all duration-200"
             />
           </div>
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2.5 items-center">
             <select
               value={timeFilter}
               onChange={(e) => setTimeFilter(e.target.value)}
-              className="h-9 rounded-md border border-input bg-card/65 px-2.5 py-1 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[110px]"
+              className="h-9 rounded-lg border border-border/60 bg-background/50 hover:bg-background/80 hover:border-border px-3 py-1 text-xs text-foreground font-medium transition-all duration-200 cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[120px]"
             >
-              <option value="all">All Time</option>
+              <option value="all">📅 All Time</option>
               <option value="today">Today</option>
               <option value="week">Past 7 Days</option>
               <option value="month">Past 30 Days</option>
@@ -154,9 +155,9 @@ export function JobTable({ jobs, onEdit }: Props) {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-9 rounded-md border border-input bg-card/65 px-2.5 py-1 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[110px]"
+              className="h-9 rounded-lg border border-border/60 bg-background/50 hover:bg-background/80 hover:border-border px-3 py-1 text-xs text-foreground font-medium transition-all duration-200 cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[120px]"
             >
-              <option value="all">All Statuses</option>
+              <option value="all">🎯 All Statuses</option>
               {statuses.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -167,9 +168,9 @@ export function JobTable({ jobs, onEdit }: Props) {
             <select
               value={platformFilter}
               onChange={(e) => setPlatformFilter(e.target.value)}
-              className="h-9 rounded-md border border-input bg-card/65 px-2.5 py-1 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[110px]"
+              className="h-9 rounded-lg border border-border/60 bg-background/50 hover:bg-background/80 hover:border-border px-3 py-1 text-xs text-foreground font-medium transition-all duration-200 cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-primary focus:border-primary min-w-[120px]"
             >
-              <option value="all">All Platforms</option>
+              <option value="all">💻 All Platforms</option>
               {platforms.map((p) => (
                 <option key={p} value={p}>
                   {p}
@@ -190,39 +191,40 @@ export function JobTable({ jobs, onEdit }: Props) {
                   setPlatformFilter("all");
                   setQ("");
                 }}
-                className="h-9 text-xs px-2.5 hover:bg-accent/40"
+                className="h-9 text-xs px-3 hover:bg-accent/40 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
               >
-                Clear
+                Clear Filters
               </Button>
             )}
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+        {/* Premium Table Container */}
+        <div className="rounded-xl border border-border/40 bg-card/20 backdrop-blur-xs overflow-hidden shadow-xs hover:shadow-md transition-shadow duration-300">
           <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead>Company</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Platform</TableHead>
-                <TableHead>Work</TableHead>
-                <TableHead>Resume</TableHead>
-                <TableHead>Applied</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+            <TableHeader className="bg-muted/30">
+              <TableRow className="hover:bg-transparent border-b border-border/40">
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider">Company</TableHead>
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider">Role</TableHead>
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider">Status</TableHead>
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider">Platform</TableHead>
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider">Work Type</TableHead>
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider">Resume</TableHead>
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider">Applied On</TableHead>
+                <TableHead className="py-3.5 font-semibold text-foreground text-xs uppercase tracking-wider text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
-                    {jobs.length === 0 ? "No applications yet. Add your first one." : "No matches."}
+                  <TableCell colSpan={8} className="text-center py-20 text-muted-foreground italic">
+                    {jobs.length === 0 ? "No applications tracked yet. Click 'Add application' to start!" : "No job applications match your filters."}
                   </TableCell>
                 </TableRow>
               ) : (
                 filtered.map((j) => (
-                  <TableRow key={j.id} className="group">
-                    <TableCell className="font-medium">
+                  <TableRow key={j.id} className="group border-b border-border/30 odd:bg-card/15 even:bg-accent/5 hover:bg-accent/25 transition-all duration-200">
+                    <TableCell className="py-3.5 font-medium">
                       <div className="flex items-center gap-1.5">
                         {j.notes && j.notes.trim() ? (
                           <Tooltip>
@@ -233,22 +235,24 @@ export function JobTable({ jobs, onEdit }: Props) {
                                     href={j.url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-1 hover:text-primary"
+                                    className="inline-flex items-center gap-1 hover:text-primary transition-colors text-foreground"
                                   >
                                     {j.company_name}
-                                    <ExternalLink className="size-3 opacity-0 group-hover:opacity-60" />
+                                    <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                   </a>
                                 ) : (
-                                  <span className="hover:text-primary transition-colors">
+                                  <span className="hover:text-primary transition-colors text-foreground">
                                     {j.company_name}
                                   </span>
                                 )}
-                                <StickyNote className="size-3.5 text-amber-400 shrink-0 animate-pulse" />
+                                <span className="inline-flex items-center justify-center size-5 rounded-full bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-colors">
+                                  <StickyNote className="size-3" />
+                                </span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs whitespace-pre-wrap break-words bg-card text-foreground border border-border/80 shadow-md p-3 text-xs rounded-lg">
                               <div className="font-semibold text-primary mb-1 text-[10px] uppercase tracking-wider">
-                                Note
+                                Application Note
                               </div>
                               {j.notes}
                             </TooltipContent>
@@ -258,26 +262,34 @@ export function JobTable({ jobs, onEdit }: Props) {
                             href={j.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 hover:text-primary"
+                            className="inline-flex items-center gap-1 hover:text-primary transition-colors text-foreground"
                           >
                             {j.company_name}
-                            <ExternalLink className="size-3 opacity-0 group-hover:opacity-60" />
+                            <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                           </a>
                         ) : (
-                          j.company_name
+                          <span className="text-foreground">{j.company_name}</span>
                         )}
                       </div>
                       {j.location && (
-                        <div className="text-xs text-muted-foreground mt-0.5">{j.location}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">{j.location}</div>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{j.role || "—"}</TableCell>
-                    <TableCell>
+                    <TableCell className="py-3.5 text-foreground/80">{j.role || "—"}</TableCell>
+                    <TableCell className="py-3.5">
                       <StatusBadge status={j.status} />
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{j.platform || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{j.work_type || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-3.5 text-muted-foreground">{j.platform || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-muted-foreground">
+                      {j.work_type ? (
+                        <span className="text-xs bg-muted/60 px-2.5 py-0.5 rounded-full border border-border/20 text-muted-foreground font-medium">
+                          {j.work_type}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="py-3.5 text-muted-foreground">
                       {j.resume_id
                         ? (() => {
                             const r = resumes.find((res) => res.id === j.resume_id);
@@ -285,7 +297,7 @@ export function JobTable({ jobs, onEdit }: Props) {
                             return (
                               <button
                                 onClick={() => downloadResume(r.id, r.name)}
-                                className="inline-flex items-center gap-1 hover:text-primary transition-colors text-xs bg-accent/40 hover:bg-accent/80 px-2 py-1 rounded max-w-[120px] text-foreground font-medium"
+                                className="inline-flex items-center gap-1.5 hover:text-primary transition-all text-[11px] bg-accent/40 hover:bg-accent/80 border border-border/40 px-2.5 py-1 rounded-md max-w-[125px] text-foreground font-medium"
                                 title={`Download ${r.name}`}
                               >
                                 <FileText className="size-3.5 shrink-0 text-primary" />
@@ -296,18 +308,18 @@ export function JobTable({ jobs, onEdit }: Props) {
                         : "—"}
                     </TableCell>
                     <TableCell
-                      className="text-muted-foreground"
+                      className="py-3.5 text-muted-foreground"
                       title={format(new Date(j.applied_at), "PPpp")}
                     >
                       {format(new Date(j.applied_at), "dd/MM/yy")}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="inline-flex gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => onEdit(j)}>
-                          <Pencil className="size-4" />
+                    <TableCell className="py-3.5 text-right">
+                      <div className="inline-flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <Button size="icon" variant="ghost" onClick={() => onEdit(j)} className="size-8 hover:bg-accent/80 rounded-md">
+                          <Pencil className="size-3.5" />
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => setConfirmId(j.id)}>
-                          <Trash2 className="size-4 text-destructive" />
+                        <Button size="icon" variant="ghost" onClick={() => setConfirmId(j.id)} className="size-8 hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 rounded-md">
+                          <Trash2 className="size-3.5" />
                         </Button>
                       </div>
                     </TableCell>
