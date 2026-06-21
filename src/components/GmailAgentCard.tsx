@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   initiateGmailLogin,
   isGmailConnected,
@@ -24,11 +25,80 @@ import {
   setScanLookbackDays,
   getGmailAccessToken,
 } from "@/lib/gmailService";
-import { analyzeEmail } from "@/lib/groq";
+import { analyzeEmailsBatch } from "@/lib/groq";
 import { useJobs, useUpdateJob } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import type { JobApplication } from "@/lib/types";
+
+const REJECTION_KEYWORDS = [
+  "unfortunately",
+  "regret to inform",
+  "regretfully",
+  "not moving forward",
+  "move forward with other candidates",
+  "proceed with other candidates",
+  "selected another candidate",
+  "chosen another candidate",
+  "other candidates",
+  "position has been filled",
+  "role has been filled",
+  "vacancy has been filled",
+  "opening has been filled",
+  "not selected",
+  "were not selected",
+  "not successful",
+  "application unsuccessful",
+  "unsuccessful application",
+  "unable to offer",
+  "unable to proceed",
+  "unable to move forward",
+  "thank you for your interest",
+  "thank you for applying",
+  "careful consideration",
+  "after careful review",
+  "after careful consideration",
+  "after reviewing your application",
+  "after reviewing your qualifications",
+  "decided not to proceed",
+  "decided not to move forward",
+  "not to move forward",
+  "not a fit for the role",
+  "not the right fit",
+  "not the best fit",
+  "won't be progressing",
+  "will not be progressing",
+  "not progressing your application",
+  "unable",
+  "leider",
+  "absage",
+  "bewerbungsabsage",
+  "wir müssen ihnen leider mitteilen",
+  "nicht berücksichtigen",
+  "nicht weiter berücksichtigen",
+  "konnten sie nicht berücksichtigen",
+  "haben uns für andere kandidaten entschieden",
+  "für andere kandidaten entschieden",
+  "andere kandidaten",
+  "anderen bewerber",
+  "anderen bewerbern",
+  "nicht in die engere auswahl",
+  "nicht in die nähere auswahl",
+  "auswahlverfahren",
+  "nicht erfolgreich",
+  "bewerbung leider",
+  "abschlägige entscheidung",
+  "keine weitere berücksichtigung",
+  "nicht weiterverfolgen",
+  "nicht fortsetzen",
+  "stellenbesetzung",
+  "stelle bereits besetzt",
+  "position bereits besetzt",
+  "die stelle nicht",
+  "stelle nicht anbieten können",
+  "die stelle nicht anbieten können",
+  "wir haben auf die ausschreibung eine vielzahl"
+];
 
 export function GmailAgentCard({
   onScanComplete,
@@ -142,42 +212,12 @@ export function GmailAgentCard({
         "Filtering emails for job-related keywords or tracked companies...",
       ]);
 
-      const jobKeywords = [
-        // English
-        "application", "apply", "applied", "job", "career", "position", "role", "interview", "resume", "cv",
-        "hiring", "thank you for", "unsuccessful", "unfortunately", "status", "candidate", "recruitment",
-        "recruiting", "talent", "offer", "update", "feedback", "assessment", "regret", "declined",
-        // German
-        "bewerbung", "stelle", "karriere", "gespräch", "vorstellung", "rückmeldung", "absage", "angebot", 
-        "vielen dank", "unterlagen", "auswahlverfahren", "kandidat",
-        // French
-        "candidature", "poste", "entretien", "offre", "retour", "refus", "statut", "recrutement",
-        // Spanish / Italian
-        "candidatura", "puesto", "entrevista", "oferta", "rechazo", "estado", "proceso"
-      ];
-
       const candidateEmails = emails.filter((email) => {
-        const lowerSubject = email.subject.toLowerCase();
-        const lowerSnippet = email.snippet.toLowerCase();
-        const lowerFrom = email.from.toLowerCase();
-
-        // Check if any active company name is mentioned
-        const mentionsCompany = companyNames.some((comp) => {
-          const cleanComp = comp.toLowerCase().trim();
-          if (!cleanComp) return false;
-          return (
-            lowerSubject.includes(cleanComp) ||
-            lowerSnippet.includes(cleanComp) ||
-            lowerFrom.includes(cleanComp)
-          );
+        const cleanBody = (email.body || "").toLowerCase().replace(/\s+/g, " ");
+        return REJECTION_KEYWORDS.some((kw) => {
+          const cleanKw = kw.toLowerCase().replace(/\s+/g, " ");
+          return cleanBody.includes(cleanKw);
         });
-
-        // Check if any job keywords are in subject or sender
-        const hasJobKeyword = jobKeywords.some(
-          (kw) => lowerSubject.includes(kw) || lowerFrom.includes(kw)
-        );
-
-        return mentionsCompany || hasJobKeyword;
       });
 
       setScanLog((prev) => [
@@ -187,68 +227,82 @@ export function GmailAgentCard({
 
       const updatedJobsList: JobApplication[] = [];
 
-      for (let idx = 0; idx < candidateEmails.length; idx++) {
-        const email = candidateEmails[idx];
-        setScanLog((prev) => [...prev, `Analyzing email: "${email.subject}"...`]);
+      if (candidateEmails.length > 0) {
+        const queuedEmails = candidateEmails.map((email, idx) => ({
+          id: `Mail ${idx + 1}`,
+          subject: email.subject,
+          from: email.from,
+          body: email.body,
+        }));
 
-        // Add a small delay between LLM calls to prevent rate limiting, except for the first one
-        if (idx > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
+        setScanLog((prev) => [
+          ...prev,
+          "Sending all candidate emails to LLM in a single batch call...",
+        ]);
 
         try {
-          const result = await analyzeEmail(email.subject, email.body, email.from, companyNames);
+          const results = await analyzeEmailsBatch(queuedEmails, companyNames);
 
-          if (!result.is_relevant) {
-            setScanLog((prev) => [...prev, `✓ Skipped: Unrelated to job applications.`]);
-            continue;
-          }
+          for (const result of results) {
+            const queued = queuedEmails.find((q) => q.id === result.id);
+            const emailSubject = queued ? queued.subject : "Unknown Subject";
 
-          if (result.is_rejection && result.company_name) {
-            const matchedJob = findMatchingJob(result.company_name);
+            setScanLog((prev) => [
+              ...prev,
+              `Processing result for ${result.id} ("${emailSubject}")...`,
+              `↳ Classification: Relevant: ${result.is_relevant}, Rejection: ${result.is_rejection}, Company: ${result.company_name || 'None'}`,
+            ]);
 
-            if (matchedJob) {
-              const currentStatus = matchedJob.status.toLowerCase();
+            if (!result.is_relevant) {
+              setScanLog((prev) => [...prev, `✓ ${result.id} Skipped: Unrelated to job applications.`]);
+              continue;
+            }
 
-              // Safe Check: "if the user has already changed the status, then not touch it."
-              if (currentStatus !== "applied" && currentStatus !== "under process") {
+            if (result.is_rejection && result.company_name) {
+              const matchedJob = findMatchingJob(result.company_name);
+
+              if (matchedJob) {
+                const currentStatus = matchedJob.status.toLowerCase();
+
+                if (currentStatus !== "applied" && currentStatus !== "under process") {
+                  setScanLog((prev) => [
+                    ...prev,
+                    `⚠️ Match found for "${matchedJob.company_name}", but status is already "${matchedJob.status}" (manually updated). Keeping current status.`,
+                  ]);
+                  continue;
+                }
+
                 setScanLog((prev) => [
                   ...prev,
-                  `⚠️ Match found for "${matchedJob.company_name}", but status is already "${matchedJob.status}" (manually updated). Keeping current status.`,
+                  `❌ Identified rejection for "${matchedJob.company_name}" (mapped from LLM output "${result.company_name}").`,
                 ]);
-                continue;
+
+                // Update the status of this job application in Supabase
+                const updated = await updateJob.mutateAsync({
+                  id: matchedJob.id,
+                  status: "Rejected",
+                });
+
+                updatedJobsList.push(updated);
+              } else {
+                setScanLog((prev) => [
+                  ...prev,
+                  `⚠️ Email classified as rejection for "${result.company_name}", but no matching active job application was found.`,
+                ]);
               }
-
-              setScanLog((prev) => [
-                ...prev,
-                `❌ Identified rejection for "${matchedJob.company_name}" (mapped from LLM output "${result.company_name}").`,
-              ]);
-
-              // Update the status of this job application in Supabase
-              const updated = await updateJob.mutateAsync({
-                id: matchedJob.id,
-                status: "Rejected",
-              });
-
-              updatedJobsList.push(updated);
             } else {
-              setScanLog((prev) => [
-                ...prev,
-                `⚠️ Email classified as rejection for "${result.company_name}", but no matching active job application was found.`,
-              ]);
+              setScanLog((prev) => [...prev, `✓ ${result.id} parsed: Not a rejection (relevant update/interview/receipt).`]);
             }
-          } else {
-            setScanLog((prev) => [...prev, `✓ Email parsed: Not a rejection (relevant update/interview/receipt).`]);
           }
         } catch (err: unknown) {
-          // "IF the analysis fail, it should not change or edit any data."
           const msg = err instanceof Error ? err.message : "Unknown error";
           setScanLog((prev) => [
             ...prev,
-            `⚠️ Failed to analyze email "${email.subject}": ${msg}. Data untouched.`,
+            `❌ Batch analysis failed: ${msg}. Data untouched.`,
           ]);
         }
       }
+
 
       const changesSummary = updatedJobsList.map(
         (job) => `➔ ${job.company_name} (${job.role || "Role"}) status updated to Rejected`
@@ -371,9 +425,9 @@ export function GmailAgentCard({
                 className="h-8 rounded-md border border-input bg-card px-2 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary min-w-[120px]"
               >
                 <option value={1}>Today Only</option>
+                <option value={2}>Yesterday & Today</option>
                 <option value={3}>Past 3 Days</option>
-                <option value={7}>Past 7 Days</option>
-                <option value={14}>Past 14 Days</option>
+                <option value={5}>Past 5 Days</option>
               </select>
             </div>
 
@@ -434,29 +488,80 @@ export function GmailAgentCard({
         )}
       </div>
 
-      {scanLog.length > 0 && (
-        <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Agent Scanning Activity Log
-          </label>
-          <div className="bg-background/80 border border-border/60 rounded-lg p-3 max-h-48 overflow-y-auto font-mono text-[10px] text-muted-foreground space-y-1.5">
-            {scanLog.map((log, index) => {
-              let color = "text-muted-foreground";
-              if (log.includes("❌") || log.includes("status updated to Rejected")) color = "text-rose-500 font-semibold";
-              if (log.includes("🎯")) color = "text-primary font-medium";
-              if (log.includes("✓")) color = "text-emerald-500";
-              if (log.includes("Scan complete")) color = "text-primary font-bold";
-              if (log.includes("📈 Status Changes")) color = "text-emerald-500 font-bold border-t border-border/20 pt-1.5";
-              if (log.includes("No job application statuses")) color = "text-muted-foreground italic";
-              return (
-                <div key={index} className={color}>
-                  {log}
+      {scanLog.length > 0 && (() => {
+        const statusLog = scanLog.filter((log) => {
+          return (
+            log.includes("❌") ||
+            log.includes("⚠️") ||
+            log.includes("➔") ||
+            log.includes("📈") ||
+            log.includes("Scan complete") ||
+            log.includes("status updated to Rejected") ||
+            log.includes("Successfully updated")
+          );
+        });
+
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Agent Status Updates Log
+              </label>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="link" className="p-0 h-auto text-xs text-primary hover:text-primary/80">
+                    View Detailed Log
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-y-auto bg-card border border-border">
+                  <DialogHeader>
+                    <DialogTitle>Detailed Scanning Activity Log</DialogTitle>
+                  </DialogHeader>
+                  <div className="bg-background border border-border rounded-lg p-4 font-mono text-xs text-muted-foreground space-y-1.5 overflow-y-auto max-h-[60vh] mt-4">
+                    {scanLog.map((log, index) => {
+                      let color = "text-muted-foreground";
+                      if (log.includes("❌") || log.includes("status updated to Rejected")) color = "text-rose-500 font-semibold";
+                      if (log.includes("🎯")) color = "text-primary font-medium";
+                      if (log.includes("✓")) color = "text-emerald-500";
+                      if (log.includes("Scan complete")) color = "text-primary font-bold";
+                      if (log.includes("📈 Status Changes")) color = "text-emerald-500 font-bold border-t border-border/20 pt-1.5";
+                      if (log.includes("No job application statuses")) color = "text-muted-foreground italic";
+                      return (
+                        <div key={index} className={color}>
+                          {log}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="bg-background/80 border border-border/60 rounded-lg p-3 max-h-48 overflow-y-auto font-mono text-[10px] text-muted-foreground space-y-1.5">
+              {statusLog.length > 0 ? (
+                statusLog.map((log, index) => {
+                  let color = "text-muted-foreground";
+                  if (log.includes("❌") || log.includes("status updated to Rejected")) color = "text-rose-500 font-semibold";
+                  if (log.includes("🎯")) color = "text-primary font-medium";
+                  if (log.includes("✓")) color = "text-emerald-500";
+                  if (log.includes("Scan complete")) color = "text-primary font-bold";
+                  if (log.includes("📈 Status Changes")) color = "text-emerald-500 font-bold border-t border-border/20 pt-1.5";
+                  if (log.includes("No job application statuses")) color = "text-muted-foreground italic";
+                  return (
+                    <div key={index} className={color}>
+                      {log}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-muted-foreground italic text-center py-2">
+                  {scanning ? "Scanning emails in progress..." : "No status changes to report."}
                 </div>
-              );
-            })}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </Card>
   );
 }

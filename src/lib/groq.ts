@@ -212,3 +212,104 @@ Do not include any explanation or markdown formatting. Output raw JSON.`;
     throw error;
   }
 }
+
+export interface BatchedEmailInput {
+  id: string;
+  subject: string;
+  from: string;
+  body: string;
+}
+
+export interface BatchedEmailAnalysisResult {
+  id: string;
+  is_relevant: boolean;
+  is_rejection: boolean;
+  company_name: string | null;
+}
+
+export async function analyzeEmailsBatch(
+  emails: BatchedEmailInput[],
+  companies: string[]
+): Promise<BatchedEmailAnalysisResult[]> {
+  const apiKey = getGroqApiKey();
+  if (!apiKey) {
+    throw new Error("Groq API key is missing. Please configure it in Settings.");
+  }
+
+  const model = getGroqModel();
+
+  const systemPrompt = `You are a recruitment assistant for a job application tracker.
+Analyze the provided batch of emails. For each email, determine:
+1. If the email is a relevant job application communication (receipt, update, interview, rejection, offer) and NOT marketing/newsletters/spam.
+2. If it is a rejection notice (indicating the candidate's application was unsuccessful or not selected).
+3. The name of the company. If it matches or is a soft match to one of the tracked companies, return the matched company name from the list.
+
+Tracked Companies:
+${companies.map((c) => `- "${c}"`).join("\n")}
+
+You must return a valid JSON object containing an array under the key "results".
+Each item in the array must have the following format:
+{
+  "id": "The ID of the email (e.g. 'Mail 1')",
+  "is_relevant": true / false,
+  "is_rejection": true / false,
+  "company_name": "Matched company name from the list, or the name found in email, or null"
+}
+
+Example output structure:
+{
+  "results": [
+    { "id": "Mail 1", "is_relevant": true, "is_rejection": true, "company_name": "Google" }
+  ]
+}
+
+Return ONLY the JSON object. Do not include any explanation or markdown formatting like \`\`\`json ... \`\`\`. Output raw JSON.`;
+
+  const userContent = emails
+    .map(
+      (email) =>
+        `--- BEGIN EMAIL ID: ${email.id} ---\nFrom: ${email.from}\nSubject: ${email.subject}\nBody:\n${email.body}\n--- END EMAIL ID: ${email.id} ---`
+    )
+    .join("\n\n");
+
+  try {
+    const response = await fetchWithGroqRetry("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: `Please analyze the following emails and return the results as a JSON object with a "results" array:\n\n${userContent}`,
+          },
+        ],
+        temperature: 0.1,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const message = errorData?.error?.message || `HTTP error ${response.status}`;
+      throw new Error(`Groq API Error: ${message}`);
+    }
+
+    const result = await response.json();
+    const content = result.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response received from Groq model.");
+    }
+
+    const parsed = JSON.parse(content) as { results: BatchedEmailAnalysisResult[] };
+    return parsed.results || [];
+  } catch (error) {
+    console.error("Error in analyzeEmailsBatch:", error);
+    throw error;
+  }
+}
+
