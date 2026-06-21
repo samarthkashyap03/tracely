@@ -25,9 +25,11 @@ Tracely is a clean, simple tool built to take the friction out of tracking your 
 
 ## Features
 
+- **Gmail Agent:** Securely connect to your Gmail inbox via client-side OAuth to fetch recent emails. The agent applies a local multilingual keyword pre-filter on email bodies and makes a single batch LLM request to classify rejections and automatically transition matching job statuses.
+- **Minimal Mode:** Instantly toggle a distraction-free mode to hide stats counters, secondary toolbars, and header descriptions, focusing the interface solely on your clean job applications list.
 - **Auto-Fill:** Paste a job description and company name, and the tool extracts the job title, location, salary range, work style (Remote/Hybrid/On-site), platform, and key requirements.
-- **Stats Dashboard:** Simple counters showing active applications, interviews scheduled, offers, and rejections.
-- **Job Board:** A filterable, searchable table to manage all your applications and notes in one place.
+- **Stats Dashboard:** Simple counters showing active applications, interviews scheduled, offers, and rejections with premium border glow styles and micro-animations.
+- **Job Board:** A filterable, searchable table to manage all your applications and notes in one place with alternating row colors.
 - **Resume Management:** Upload, preview, and download different versions of your resume (PDF or Word format). Link them directly to specific applications so you always know which version you applied with.
 - **Job Analytics:** Visual insights and charts for your job search, including application growth over time, platform breakdowns, and conversion insights showing which resumes and roles get the most interview callbacks.
 - **Custom Statuses:** Add or modify application stages, platform names, and tags dynamically.
@@ -45,11 +47,13 @@ graph TD
     Client["Client App (React 19 / Tailwind / TanStack Query)"]
     Server["SSR Server (TanStack Start / Cloudflare Router)"]
     Supabase["Supabase DB & Auth (Row Level Security)"]
-    Groq["Groq API (Llama 3.3 parsing)"]
+    Groq["Groq API (Llama 3.3 parsing & batching)"]
+    Gmail["Gmail API (Read-only OAuth)"]
 
     Client <-->|Renders UI / Hydrates| Server
     Client <-->|Secure Session & SQL Queries| Supabase
     Client -->|Direct Secure Extraction Request| Groq
+    Client -->|OAuth Access & Fetch| Gmail
 ```
 
 1.  **Frontend (React 19 & Tailwind CSS v4)**: Uses shadcn/ui components for a clean and responsive UI.

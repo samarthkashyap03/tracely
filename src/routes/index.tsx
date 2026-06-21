@@ -8,6 +8,8 @@ import {
   Zap,
   FileText,
   BarChart3,
+  Mail,
+  Eye,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -59,7 +61,7 @@ function Landing() {
           <div className="mx-auto max-w-4xl px-6 pt-24 pb-20 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/50 px-3 py-1 text-xs text-muted-foreground">
               <Sparkles className="size-3.5 text-primary" />
-              Built for serious job seekers
+              Built for serious job seekers — Now with Gmail Agent & Minimal Mode!
             </div>
             <h1 className="mt-6 text-5xl md:text-6xl font-semibold tracking-tight leading-[1.05]">
               Every application. <span className="text-primary">One quiet dashboard.</span>
@@ -87,12 +89,22 @@ function Landing() {
 
         {/* Features */}
         <section className="mx-auto max-w-6xl px-6 pb-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {[
               {
                 icon: LayoutGrid,
                 title: "Clean table view",
                 body: "Sort, filter, search. No cognitive overload — just the columns that matter.",
+              },
+              {
+                icon: Mail,
+                title: "Gmail Agent",
+                body: "Securely fetch and scan your inbox. Detects rejection emails, fuzzy-matches company names, and updates status automatically.",
+              },
+              {
+                icon: Eye,
+                title: "Minimal Mode",
+                body: "Instantly hide headers, stats cards, and secondary toolbars to track applications with zero distractions.",
               },
               {
                 icon: Sparkles,
