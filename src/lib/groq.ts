@@ -10,7 +10,7 @@ export const GROQ_MODELS = [
 
 export function getGroqApiKey(): string {
   if (typeof window !== "undefined") {
-    const localKey = localStorage.getItem(API_KEY_KEY);
+    const localKey = sessionStorage.getItem(API_KEY_KEY);
     if (localKey) return localKey;
   }
   return (import.meta.env.VITE_GROQ_API_KEY as string) || "";
@@ -18,19 +18,19 @@ export function getGroqApiKey(): string {
 
 export function setGroqApiKey(key: string) {
   if (typeof window !== "undefined") {
-    localStorage.setItem(API_KEY_KEY, key.trim());
+    sessionStorage.setItem(API_KEY_KEY, key.trim());
   }
 }
 
 export function clearGroqApiKey() {
   if (typeof window !== "undefined") {
-    localStorage.removeItem(API_KEY_KEY);
+    sessionStorage.removeItem(API_KEY_KEY);
   }
 }
 
 export function getGroqModel(): string {
   if (typeof window !== "undefined") {
-    const model = localStorage.getItem(MODEL_KEY);
+    const model = sessionStorage.getItem(MODEL_KEY);
     if (model) return model;
   }
   return DEFAULT_GROQ_MODEL;
@@ -38,7 +38,7 @@ export function getGroqModel(): string {
 
 export function setGroqModel(model: string) {
   if (typeof window !== "undefined") {
-    localStorage.setItem(MODEL_KEY, model.trim());
+    sessionStorage.setItem(MODEL_KEY, model.trim());
   }
 }
 

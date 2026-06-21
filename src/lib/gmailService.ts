@@ -1,10 +1,8 @@
-const CLIENT_ID_KEY = "gmail_client_id";
 const ACCESS_TOKEN_KEY = "gmail_access_token";
 const EXPIRES_AT_KEY = "gmail_expires_at";
 const CONSENT_KEY = "gmail_consent_granted";
 const LOOKBACK_DAYS_KEY = "gmail_scan_lookback";
 
-// Default Client ID fallback (to be replaced by the developer's client ID in production)
 export const DEFAULT_GOOGLE_CLIENT_ID =
   (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) ||
   "1046909062332-placeholder.apps.googleusercontent.com";
@@ -12,28 +10,13 @@ export const DEFAULT_GOOGLE_CLIENT_ID =
 export function getStoredClientId(): string {
   const envId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
   if (envId) return envId.trim();
-
-  if (typeof window !== "undefined") {
-    const local = localStorage.getItem(CLIENT_ID_KEY);
-    if (local) return local.trim();
-  }
   return DEFAULT_GOOGLE_CLIENT_ID;
-}
-
-export function setStoredClientId(id: string) {
-  if (typeof window !== "undefined") {
-    if (id.trim()) {
-      localStorage.setItem(CLIENT_ID_KEY, id.trim());
-    } else {
-      localStorage.removeItem(CLIENT_ID_KEY);
-    }
-  }
 }
 
 export function getGmailAccessToken(): string | null {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const expiresAt = localStorage.getItem(EXPIRES_AT_KEY);
+    const token = sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    const expiresAt = sessionStorage.getItem(EXPIRES_AT_KEY);
     if (token && expiresAt) {
       if (Date.now() < Number(expiresAt)) {
         return token;
@@ -51,20 +34,20 @@ export function isGmailConnected(): boolean {
 
 export function getEmailConsent(): boolean {
   if (typeof window !== "undefined") {
-    return localStorage.getItem(CONSENT_KEY) === "true";
+    return sessionStorage.getItem(CONSENT_KEY) === "true";
   }
   return false;
 }
 
 export function setEmailConsent(consent: boolean) {
   if (typeof window !== "undefined") {
-    localStorage.setItem(CONSENT_KEY, String(consent));
+    sessionStorage.setItem(CONSENT_KEY, String(consent));
   }
 }
 
 export function getScanLookbackDays(): number {
   if (typeof window !== "undefined") {
-    const val = localStorage.getItem(LOOKBACK_DAYS_KEY);
+    const val = sessionStorage.getItem(LOOKBACK_DAYS_KEY);
     if (val) return Number(val);
   }
   return 1; // Default to present day (1 day)
@@ -72,7 +55,7 @@ export function getScanLookbackDays(): number {
 
 export function setScanLookbackDays(days: number) {
   if (typeof window !== "undefined") {
-    localStorage.setItem(LOOKBACK_DAYS_KEY, String(days));
+    sessionStorage.setItem(LOOKBACK_DAYS_KEY, String(days));
   }
 }
 
@@ -80,11 +63,21 @@ export function initiateGmailLogin() {
   const clientId = getStoredClientId();
   const redirectUri = window.location.origin + window.location.pathname;
   const scope = "https://www.googleapis.com/auth/gmail.readonly";
+  
+  // Generate a cryptographically secure random state parameter to prevent CSRF / State tampering
+  const state = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : Math.random().toString(36).substring(2) + Date.now().toString(36);
+  
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("gmail_oauth_state", state);
+  }
+
   const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
     clientId,
   )}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(
     scope,
-  )}&state=gmail_auth`;
+  )}&state=${encodeURIComponent(state)}`;
 
   setEmailConsent(true);
   window.location.href = url;
@@ -100,11 +93,15 @@ export function handleOAuthRedirect(): boolean {
   const expiresIn = params.get("expires_in");
   const state = params.get("state");
 
-  if (accessToken && state === "gmail_auth") {
+  const savedState = sessionStorage.getItem("gmail_oauth_state");
+
+  // Validate the redirect state parameter against our saved dynamic state nonce
+  if (accessToken && state && savedState && state === savedState) {
     const expiresAt = Date.now() + Number(expiresIn || 3600) * 1000;
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(EXPIRES_AT_KEY, String(expiresAt));
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    sessionStorage.setItem(EXPIRES_AT_KEY, String(expiresAt));
     setEmailConsent(true);
+    sessionStorage.removeItem("gmail_oauth_state"); // Clear state nonce after use
 
     // Clear hash from URL cleanly
     window.history.replaceState(
@@ -119,9 +116,12 @@ export function handleOAuthRedirect(): boolean {
 
 export function disconnectGmail() {
   if (typeof window !== "undefined") {
+    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    sessionStorage.removeItem(EXPIRES_AT_KEY);
+    sessionStorage.setItem(CONSENT_KEY, "false");
+    // Also clean up any legacy keys stored in localStorage
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(EXPIRES_AT_KEY);
-    localStorage.setItem(CONSENT_KEY, "false");
   }
 }
 

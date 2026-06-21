@@ -441,6 +441,8 @@ export function GmailAgentCard({
               </div>
             )}
 
+
+
             <div className="pt-2 border-t border-border/20 flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2">
                 <div

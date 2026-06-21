@@ -94,7 +94,7 @@ export function AiConfigCard() {
               </li>
             </ol>
             <p className="mt-2 text-[11px] leading-normal italic text-primary/80">
-              Note: Your API Key is stored safely on your own browser (localStorage) and only sent
+              Note: Your API Key is stored safely on your own browser (sessionStorage) and only sent
               directly to the Groq API endpoint.
             </p>
           </AlertDescription>
