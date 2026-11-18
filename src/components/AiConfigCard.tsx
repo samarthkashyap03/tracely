@@ -13,8 +13,14 @@ import {
   GROQ_MODELS,
 } from "@/lib/groq";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+import { useProfile, useUpdateProfile } from "@/lib/queries";
 
 export function AiConfigCard() {
+  const { user } = useAuth();
+  const { data: profile } = useProfile(user?.id);
+  const updateProfile = useUpdateProfile(user?.id);
+
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("");
   const [showKey, setShowKey] = useState(false);
@@ -25,16 +31,33 @@ export function AiConfigCard() {
     setModel(getGroqModel());
   }, []);
 
-  const handleSave = () => {
+  useEffect(() => {
+    if (profile?.groq_api_key) {
+      setApiKey(profile.groq_api_key);
+      setGroqApiKey(profile.groq_api_key);
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
     setGroqApiKey(apiKey);
     setGroqModel(model);
-    toast.success("AI Configuration saved successfully!");
+    try {
+      await updateProfile.mutateAsync({ groq_api_key: apiKey });
+      toast.success("AI Configuration saved successfully!");
+    } catch (err: any) {
+      toast.error(`Failed to sync with profile: ${err.message}`);
+    }
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     clearGroqApiKey();
     setApiKey("");
-    toast.info("Groq API key cleared.");
+    try {
+      await updateProfile.mutateAsync({ groq_api_key: null });
+      toast.info("Groq API key cleared.");
+    } catch (err: any) {
+      toast.error(`Failed to clear from profile: ${err.message}`);
+    }
   };
 
   return (

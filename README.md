@@ -26,7 +26,6 @@ Tracely is a clean, simple tool built to take the friction out of tracking your 
 ## Features
 
 - **Gmail Agent:** Securely connect to your Gmail inbox via client-side OAuth to fetch recent emails. The agent applies a local multilingual keyword pre-filter on email bodies and makes a single batch LLM request to classify rejections and automatically transition matching job statuses.
-- **Minimal Mode:** Instantly toggle a distraction-free mode to hide stats counters, secondary toolbars, and header descriptions, focusing the interface solely on your clean job applications list.
 - **Auto-Fill:** Paste a job description and company name, and the tool extracts the job title, location, salary range, work style (Remote/Hybrid/On-site), platform, and key requirements.
 - **Stats Dashboard:** Simple counters showing active applications, interviews scheduled, offers, and rejections with premium border glow styles and micro-animations.
 - **Job Board:** A filterable, searchable table to manage all your applications and notes in one place with alternating row colors.

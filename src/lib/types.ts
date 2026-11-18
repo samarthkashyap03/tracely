@@ -42,3 +42,11 @@ export interface UserNote {
   completed: boolean;
   created_at: string;
 }
+
+export interface UserProfile {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  groq_api_key: string | null;
+  created_at: string;
+}

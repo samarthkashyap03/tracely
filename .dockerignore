@@ -1,0 +1,25 @@
+# Build artefacts
+node_modules
+.output
+dist
+.wrangler
+.tanstack
+
+# Dev tooling
+.git
+.gitignore
+*.md
+
+# Local env (secrets are passed as build-args)
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

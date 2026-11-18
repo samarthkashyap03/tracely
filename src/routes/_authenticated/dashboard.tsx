@@ -6,7 +6,8 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
-import { useJobs } from "@/lib/queries";
+import { useJobs, useProfile } from "@/lib/queries";
+import { setGroqApiKey } from "@/lib/groq";
 import { JobTable } from "@/components/JobTable";
 import { JobFormSheet } from "@/components/JobFormSheet";
 import { StatsCards } from "@/components/StatsCards";
@@ -26,9 +27,17 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function DashboardPage() {
   const { user } = useAuth();
   const { data: jobs = [], isLoading } = useJobs(user?.id);
+  const { data: profile } = useProfile(user?.id);
   const [open, setOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [editing, setEditing] = useState<JobApplication | null>(null);
+
+  // Sync profile's Groq key to sessionStorage for active scanner functions
+  useEffect(() => {
+    if (profile?.groq_api_key) {
+      setGroqApiKey(profile.groq_api_key);
+    }
+  }, [profile]);
   const [recentUpdates, setRecentUpdates] = useState<
     Array<{ id: string; company_name: string; role: string | null; updated_at: string }>
   >([]);

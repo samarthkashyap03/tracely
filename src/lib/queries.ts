@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabase";
-import type { JobApplication, OptionCategory, UserOption, Resume, UserNote } from "./types";
+import type { JobApplication, OptionCategory, UserOption, Resume, UserNote, UserProfile } from "./types";
 
 // ---------- Jobs ----------
 export function useJobs(userId: string | undefined) {
@@ -274,5 +274,40 @@ export function useDeleteNote(userId: string | undefined) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notes", userId] }),
+  });
+}
+
+// ---------- Profile ----------
+export function useProfile(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["profile", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      if (error) throw error;
+      return data as UserProfile;
+    },
+  });
+}
+
+export function useUpdateProfile(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (patch: Partial<UserProfile>) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(patch)
+        .eq("id", userId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as UserProfile;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile", userId] }),
   });
 }
