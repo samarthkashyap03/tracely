@@ -32,6 +32,12 @@ const makeJob = (status: string, id = Math.random().toString()): JobApplication 
   resume_id: null,
 });
 
+function getStatCardValue(label: RegExp | string): string | null | undefined {
+  const labelEl = screen.getByText(label);
+  const card = labelEl.parentElement?.parentElement;
+  return card?.querySelector(".text-3xl")?.textContent;
+}
+
 describe("StatsCards", () => {
   it('shows "0" for every stat when no jobs are passed', () => {
     render(<StatsCards jobs={[]} />);
@@ -43,36 +49,31 @@ describe("StatsCards", () => {
   it("displays the correct total application count", () => {
     const jobs = [makeJob("applied"), makeJob("interview"), makeJob("rejected")];
     render(<StatsCards jobs={jobs} />);
-    expect(screen.getByText("3")).toBeInTheDocument(); // Total
+    expect(getStatCardValue(/total applications/i)).toBe("3");
   });
 
   it('counts "applied" and "under process" as active roles', () => {
     const jobs = [makeJob("applied"), makeJob("under process"), makeJob("rejected")];
     render(<StatsCards jobs={jobs} />);
-    // Active = 2 (applied + under process)
-    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(getStatCardValue(/active roles/i)).toBe("2");
   });
 
   it("counts interviews correctly", () => {
     const jobs = [makeJob("interview"), makeJob("interview"), makeJob("applied")];
     render(<StatsCards jobs={jobs} />);
-    // Interview count = 2
-    const twos = screen.getAllByText("2");
-    expect(twos.length).toBeGreaterThanOrEqual(1);
+    expect(getStatCardValue(/interviews/i)).toBe("2");
   });
 
   it("counts offers correctly", () => {
     const jobs = [makeJob("offer"), makeJob("applied")];
     render(<StatsCards jobs={jobs} />);
-    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(getStatCardValue(/offers received/i)).toBe("1");
   });
 
   it("counts rejections correctly", () => {
     const jobs = [makeJob("rejected"), makeJob("rejected"), makeJob("rejected")];
     render(<StatsCards jobs={jobs} />);
-    // Rejections = 3, Total = 3 — both show "3"
-    const threes = screen.getAllByText("3");
-    expect(threes.length).toBeGreaterThanOrEqual(1);
+    expect(getStatCardValue(/rejections/i)).toBe("3");
   });
 
   it("renders all five stat labels", () => {
@@ -88,7 +89,6 @@ describe("StatsCards", () => {
     // Status "Rejected" (capital R) should still be counted
     const jobs = [makeJob("Rejected")];
     render(<StatsCards jobs={jobs} />);
-    // Rejections card value should be 1
-    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(getStatCardValue(/rejections/i)).toBe("1");
   });
 });
