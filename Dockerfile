@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies first (layer-cached unless lockfile changes)
 COPY bun.lock bunfig.toml package.json ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy source and build
 COPY . .
